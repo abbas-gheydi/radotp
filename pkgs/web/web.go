@@ -13,6 +13,7 @@ import (
 )
 
 var ListenAddr = "0.0.0.0:8080"
+var QrIssuer = "radotp"
 
 //go:embed templates
 var templates embed.FS
@@ -70,7 +71,7 @@ func (t *templateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func createuser(user *userCode) {
-	user.Code, user.Qr = authentiate.NewOtpUser(user.UserName, "test")
+	user.Code, user.Qr = authentiate.NewOtpUser(user.UserName, QrIssuer)
 	user.Err = storage.Set(user.UserName, user.Code)
 	if user.Err != nil {
 		fmt.Print("errorr opts.err")

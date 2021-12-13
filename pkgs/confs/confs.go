@@ -39,6 +39,7 @@ func (c *Configurations) Load() {
 
 type webconf struct {
 	Listen string
+	Isuuer string
 }
 type metrics struct {
 	EnablePrometheusExporter bool

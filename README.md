@@ -19,7 +19,7 @@ Download [RadOTP](https://github.com/Abbas-gheydi/radotp/releases) and install i
 ```bash
 sudo install ./radotp /usr/local/bin/
 ````
-if you want to launch it as a service, you must make a new [systemd serivce](https://www.suse.com/support/kb/doc/?id=000019672).   
+if you want to run it as a service, you must make a new [systemd serivce](https://www.suse.com/support/kb/doc/?id=000019672).   
 
 ### How to Use it:
 - install PostgreSQL and configure it.   
@@ -31,7 +31,7 @@ radotp
 
 - Then Download [Google Authenticator](https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2&hl=en_US&gl=US) and scan the QR code.   
 
-- Config Cisco or Fortinet firewalls to use radOTP as authentication source:   
+- Config Cisco or Fortinet firewalls to use radOTP (Radius) as authentication source:   
 [Fortigate](https://docs.fortinet.com/document/fortigate/6.0.0/cookbook/200757/connecting-the-fortigate-to-the-radius-server)   
 [Cisco ASA](https://www.cisco.com/c/en/us/support/docs/security/asa-5500-x-series-next-generation-firewalls/98594-configure-radius-authentication.html)   
 
