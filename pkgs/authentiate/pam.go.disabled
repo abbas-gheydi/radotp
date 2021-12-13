@@ -1,0 +1,64 @@
+package auth
+
+import (
+	"errors"
+	"fmt"
+
+	"github.com/msteinert/pam"
+)
+
+type User struct {
+	username string
+	password string
+}
+
+func (user *User) authService() error {
+	t, err := pam.StartFunc("", "", func(s pam.Style, msg string) (string, error) {
+
+		switch s {
+		case pam.PromptEchoOff:
+			return user.password, nil
+		case pam.PromptEchoOn:
+
+			return user.username, nil
+		case pam.ErrorMsg:
+			fmt.Print(msg)
+			return "", nil
+		case pam.TextInfo:
+			fmt.Println(msg)
+			return "", nil
+		}
+		return "", errors.New("Unrecognized message style")
+	})
+	if err != nil {
+		return err
+	}
+	err = t.Authenticate(0)
+	if err != nil {
+		return err
+	}
+	return nil
+
+}
+func IsUserAuthenticated(usrname string, pass string) error {
+
+	newuser := User{
+		username: usrname,
+		password: pass,
+	}
+	return newuser.authService()
+}
+/*
+func main() {
+
+	err := IsUserAuthenticated("pi", "1234")
+
+	if err != nil {
+		fmt.Println("Unable to authenticate your password or username! Abort!")
+	} else {
+		fmt.Println("Credential accepted! Proceeding to .....")
+		// this is where you want to execute your main function for authenticated users.
+	}
+
+}
+*/

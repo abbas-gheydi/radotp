@@ -1,0 +1,59 @@
+Date : 2021-10-31 13:09:32
+Directory : /home/pi/Desktop/go/radotp/pkgs
+Total : 22 files,  1726 codes, 180 comments, 419 blanks, all 2325 lines
+
+Languages
++----------------------+------------+------------+------------+------------+------------+
+| language             | files      | code       | comment    | blank      | total      |
++----------------------+------------+------------+------------+------------+------------+
+| Go                   |         12 |      1,166 |         35 |        256 |      1,457 |
+| JavaScript           |          6 |        423 |        139 |         77 |        639 |
+| Golang HTML Template |          3 |        136 |          0 |         86 |        222 |
+| CSS                  |          1 |          1 |          6 |          0 |          7 |
++----------------------+------------+------------+------------+------------+------------+
+
+Directories
++------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                   | files      | code       | comment    | blank      | total      |
++------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                      |         22 |      1,726 |        180 |        419 |      2,325 |
+| authentiate                                                            |          3 |         52 |          4 |         25 |         81 |
+| confs                                                                  |          1 |         40 |          9 |         11 |         60 |
+| rad                                                                    |          5 |        768 |         14 |        135 |        917 |
+| storage                                                                |          1 |        114 |          0 |         30 |        144 |
+| web                                                                    |         12 |        752 |        153 |        218 |      1,123 |
+| web/assets                                                             |          8 |        462 |        145 |         86 |        693 |
+| web/assets/css                                                         |          1 |          1 |          6 |          0 |          7 |
+| web/assets/js                                                          |          3 |          5 |         11 |          2 |         18 |
+| web/assets/qr                                                          |          4 |        456 |        128 |         84 |        668 |
+| web/templates                                                          |          2 |         98 |          0 |         77 |        175 |
++------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++------------------------------------------------------------------------+----------------------+------------+------------+------------+------------+
+| filename                                                               | language             | code       | comment    | blank      | total      |
++------------------------------------------------------------------------+----------------------+------------+------------+------------+------------+
+| /home/pi/Desktop/go/github.com/Abbas-gheydi/radotp/pkgs/authentiate/interface.go               | Go                   |          4 |          0 |          2 |          6 |
+| /home/pi/Desktop/go/github.com/Abbas-gheydi/radotp/pkgs/authentiate/ldap.go                    | Go                   |         18 |          1 |         11 |         30 |
+| /home/pi/Desktop/go/github.com/Abbas-gheydi/radotp/pkgs/authentiate/otp.go                     | Go                   |         30 |          3 |         12 |         45 |
+| /home/pi/Desktop/go/github.com/Abbas-gheydi/radotp/pkgs/confs/confs.go                         | Go                   |         40 |          9 |         11 |         60 |
+| /home/pi/Desktop/go/github.com/Abbas-gheydi/radotp/pkgs/rad/auth.go                            | Go                   |         57 |          6 |         23 |         86 |
+| /home/pi/Desktop/go/github.com/Abbas-gheydi/radotp/pkgs/rad/fortigate.go                       | Go                   |        592 |          1 |         71 |        664 |
+| /home/pi/Desktop/go/github.com/Abbas-gheydi/radotp/pkgs/rad/handlers.go                        | Go                   |         41 |          3 |         11 |         55 |
+| /home/pi/Desktop/go/github.com/Abbas-gheydi/radotp/pkgs/rad/startradius.go                     | Go                   |         35 |          2 |         16 |         53 |
+| /home/pi/Desktop/go/github.com/Abbas-gheydi/radotp/pkgs/rad/states.go                          | Go                   |         43 |          2 |         14 |         59 |
+| /home/pi/Desktop/go/github.com/Abbas-gheydi/radotp/pkgs/storage/db.go                          | Go                   |        114 |          0 |         30 |        144 |
+| /home/pi/Desktop/go/github.com/Abbas-gheydi/radotp/pkgs/web/assets/css/bootstrap.min.css       | CSS                  |          1 |          6 |          0 |          7 |
+| /home/pi/Desktop/go/github.com/Abbas-gheydi/radotp/pkgs/web/assets/js/bootstrap.min.js         | JavaScript           |          1 |          6 |          0 |          7 |
+| /home/pi/Desktop/go/github.com/Abbas-gheydi/radotp/pkgs/web/assets/js/jquery-3.2.1.slim.min.js | JavaScript           |          3 |          1 |          1 |          5 |
+| /home/pi/Desktop/go/github.com/Abbas-gheydi/radotp/pkgs/web/assets/js/popper.min.js            | JavaScript           |          1 |          4 |          1 |          6 |
+| /home/pi/Desktop/go/github.com/Abbas-gheydi/radotp/pkgs/web/assets/qr/index.html               | Golang HTML Template |         38 |          0 |          9 |         47 |
+| /home/pi/Desktop/go/github.com/Abbas-gheydi/radotp/pkgs/web/assets/qr/jquery2.js               | JavaScript           |          3 |          1 |          1 |          5 |
+| /home/pi/Desktop/go/github.com/Abbas-gheydi/radotp/pkgs/web/assets/qr/qrcode.js                | JavaScript           |        414 |        127 |         74 |        615 |
+| /home/pi/Desktop/go/github.com/Abbas-gheydi/radotp/pkgs/web/assets/qr/qrcode.min.js            | JavaScript           |          1 |          0 |          0 |          1 |
+| /home/pi/Desktop/go/github.com/Abbas-gheydi/radotp/pkgs/web/auth.go                            | Go                   |         81 |          2 |         26 |        109 |
+| /home/pi/Desktop/go/github.com/Abbas-gheydi/radotp/pkgs/web/templates/index.gohtml             | Golang HTML Template |         84 |          0 |         75 |        159 |
+| /home/pi/Desktop/go/github.com/Abbas-gheydi/radotp/pkgs/web/templates/login.gohtml             | Golang HTML Template |         14 |          0 |          2 |         16 |
+| /home/pi/Desktop/go/github.com/Abbas-gheydi/radotp/pkgs/web/web.go                             | Go                   |        111 |          6 |         29 |        146 |
+| Total                                                                  |                      |      1,726 |        180 |        419 |      2,325 |
++------------------------------------------------------------------------+----------------------+------------+------------+------------+------------+

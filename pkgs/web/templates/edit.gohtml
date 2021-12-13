@@ -1,0 +1,69 @@
+<!--
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+</head>
+<body>
+
+<form method="post">
+    <input type="text" name="current" placeholder="current password"><br>
+    <input type="text" name="new" placeholder="new password"><br>
+    <input type="text" name="repeat" placeholder="repeat new password"><br>
+    <input type="submit">
+</form>
+
+</body>
+</html>
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+
+  <title>edit webadmin user</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+<script src="/assets/js/jquery-3.2.1.slim.min.js"  crossorigin="anonymous"></script>
+<script src="/assets/js/popper.min.js"  crossorigin="anonymous"></script>
+<script src="/assets/js/bootstrap.min.js"  crossorigin="anonymous"></script>
+<script type="text/javascript" src="/assets/qr/qrcode.js"></script>
+</head>
+<body>
+<div class="container">
+  <h2>change password</h2>
+  <form method="post">
+    <div class="form-group">
+      <label for="email">Current password:</label>
+      <input type="password" class="form-control" id="current" placeholder="Enter current password" name="current" required />
+    </div>
+    <div class="form-group">
+      <label for="pwd">Password:</label>
+      <input type="password" class="form-control" id="pwd" placeholder="Enter password" name="pwd" required />
+    </div>
+    <div class="form-group">
+      <label for="cpwd">Cofirm Password:</label>
+      <input type="password" class="form-control" id="cpwd" placeholder="Enter Confirm password" name="cpwd" required />
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+  </form>
+</div>
+  <script>
+  var password = document.getElementById("pwd");
+  var confirm_password = document.getElementById("cpwd");
+
+	function validatePassword(){
+	  if(password.value != confirm_password.value) {
+		confirm_password.setCustomValidity("Passwords Don't Match");
+	  } else {
+		confirm_password.setCustomValidity('');
+	  }
+	}
+
+	password.onchange = validatePassword;
+	confirm_password.onkeyup = validatePassword;
+  </script>
+</body>
+</html>

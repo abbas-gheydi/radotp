@@ -1,0 +1,24 @@
+"filename", "language", "Go", "JavaScript", "Golang HTML Template", "CSS", "comment", "blank", "total"
+"/home/pi/Desktop/go/github.com/Abbas-gheydi/radotp/pkgs/authentiate/interface.go", "Go", 4, 0, 0, 0, 0, 2, 6
+"/home/pi/Desktop/go/github.com/Abbas-gheydi/radotp/pkgs/authentiate/ldap.go", "Go", 18, 0, 0, 0, 1, 11, 30
+"/home/pi/Desktop/go/github.com/Abbas-gheydi/radotp/pkgs/authentiate/otp.go", "Go", 30, 0, 0, 0, 3, 12, 45
+"/home/pi/Desktop/go/github.com/Abbas-gheydi/radotp/pkgs/confs/confs.go", "Go", 40, 0, 0, 0, 9, 11, 60
+"/home/pi/Desktop/go/github.com/Abbas-gheydi/radotp/pkgs/rad/auth.go", "Go", 57, 0, 0, 0, 6, 23, 86
+"/home/pi/Desktop/go/github.com/Abbas-gheydi/radotp/pkgs/rad/fortigate.go", "Go", 592, 0, 0, 0, 1, 71, 664
+"/home/pi/Desktop/go/github.com/Abbas-gheydi/radotp/pkgs/rad/handlers.go", "Go", 41, 0, 0, 0, 3, 11, 55
+"/home/pi/Desktop/go/github.com/Abbas-gheydi/radotp/pkgs/rad/startradius.go", "Go", 35, 0, 0, 0, 2, 16, 53
+"/home/pi/Desktop/go/github.com/Abbas-gheydi/radotp/pkgs/rad/states.go", "Go", 43, 0, 0, 0, 2, 14, 59
+"/home/pi/Desktop/go/github.com/Abbas-gheydi/radotp/pkgs/storage/db.go", "Go", 114, 0, 0, 0, 0, 30, 144
+"/home/pi/Desktop/go/github.com/Abbas-gheydi/radotp/pkgs/web/assets/css/bootstrap.min.css", "CSS", 0, 0, 0, 1, 6, 0, 7
+"/home/pi/Desktop/go/github.com/Abbas-gheydi/radotp/pkgs/web/assets/js/bootstrap.min.js", "JavaScript", 0, 1, 0, 0, 6, 0, 7
+"/home/pi/Desktop/go/github.com/Abbas-gheydi/radotp/pkgs/web/assets/js/jquery-3.2.1.slim.min.js", "JavaScript", 0, 3, 0, 0, 1, 1, 5
+"/home/pi/Desktop/go/github.com/Abbas-gheydi/radotp/pkgs/web/assets/js/popper.min.js", "JavaScript", 0, 1, 0, 0, 4, 1, 6
+"/home/pi/Desktop/go/github.com/Abbas-gheydi/radotp/pkgs/web/assets/qr/index.html", "Golang HTML Template", 0, 0, 38, 0, 0, 9, 47
+"/home/pi/Desktop/go/github.com/Abbas-gheydi/radotp/pkgs/web/assets/qr/jquery2.js", "JavaScript", 0, 3, 0, 0, 1, 1, 5
+"/home/pi/Desktop/go/github.com/Abbas-gheydi/radotp/pkgs/web/assets/qr/qrcode.js", "JavaScript", 0, 414, 0, 0, 127, 74, 615
+"/home/pi/Desktop/go/github.com/Abbas-gheydi/radotp/pkgs/web/assets/qr/qrcode.min.js", "JavaScript", 0, 1, 0, 0, 0, 0, 1
+"/home/pi/Desktop/go/github.com/Abbas-gheydi/radotp/pkgs/web/auth.go", "Go", 81, 0, 0, 0, 2, 26, 109
+"/home/pi/Desktop/go/github.com/Abbas-gheydi/radotp/pkgs/web/templates/index.gohtml", "Golang HTML Template", 0, 0, 84, 0, 0, 75, 159
+"/home/pi/Desktop/go/github.com/Abbas-gheydi/radotp/pkgs/web/templates/login.gohtml", "Golang HTML Template", 0, 0, 14, 0, 0, 2, 16
+"/home/pi/Desktop/go/github.com/Abbas-gheydi/radotp/pkgs/web/web.go", "Go", 111, 0, 0, 0, 6, 29, 146
+"Total", "-", 1166, 423, 136, 1, 180, 419, 2325
