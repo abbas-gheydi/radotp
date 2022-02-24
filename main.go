@@ -52,7 +52,7 @@ func main() {
 
 	art()
 
-	//databse configuraion
+	//database configuraion
 	storage.Initialize()
 
 	if cfg.Metrics.EnablePrometheusExporter {
