@@ -79,7 +79,7 @@ func createuser(user *userCode) {
 }
 
 func updateuser(user *userCode) {
-	user.Code, user.Qr = authentiate.NewOtpUser(user.UserName, "test")
+	user.Code, user.Qr = authentiate.NewOtpUser(user.UserName, QrIssuer)
 	user.Err = storage.Update(user.UserName, user.Code)
 	if user.Err != nil {
 		fmt.Print("errorr opts.err")
