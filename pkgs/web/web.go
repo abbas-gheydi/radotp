@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"strings"
 	"sync"
 
 	"github.com/Abbas-gheydi/radotp/pkgs/authentiate"
@@ -74,7 +75,11 @@ func createuser(user *userCode) {
 	user.Code, user.Qr = authentiate.NewOtpUser(user.UserName, QrIssuer)
 	user.Err = storage.Set(user.UserName, user.Code)
 	if user.Err != nil {
-		fmt.Print("errorr opts.err")
+		if strings.Contains(user.Err.Error(), "duplicate key value violates unique constraint \"otps_username_key\"") {
+			user.Err = fmt.Errorf("already exists")
+		}
+
+		log.Println("errorr opts.err", user.Err)
 	}
 }
 
@@ -82,14 +87,14 @@ func updateuser(user *userCode) {
 	user.Code, user.Qr = authentiate.NewOtpUser(user.UserName, QrIssuer)
 	user.Err = storage.Update(user.UserName, user.Code)
 	if user.Err != nil {
-		fmt.Print("errorr opts.err")
+		log.Println("errorr opts.err", user.Err)
 	}
 }
 
 func deleteuser(user *userCode) {
 	user.Err = storage.Delete(user.UserName)
 	if user.Err != nil {
-		fmt.Print("errorr opts.err")
+		log.Println("errorr opts.err", user.Err)
 	} else {
 		user.Result = user.UserName + " deleted"
 	}
