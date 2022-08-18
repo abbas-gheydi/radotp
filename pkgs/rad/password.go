@@ -12,6 +12,11 @@ import (
 // set ldap as auth provider
 var Auth_Provider authentiate.LdapProvider
 
+const (
+	//label_otp_stage  = "otp"
+	label_ldap_stage = "active directory"
+)
+
 func User_PassHandler(w radius.ResponseWriter, r *radius.Request) {
 
 	paket := r.Packet
@@ -22,14 +27,14 @@ func User_PassHandler(w radius.ResponseWriter, r *radius.Request) {
 	if IsUserPassValied(Auth_Provider, username, password) {
 		//check config
 		if RadiusConfigs.Authentication_Mode == "only_password" {
-			code = AcceptUser(w, r)
+			code = AcceptUser(w, r, label_ldap_stage)
 		} else {
-			code = SendForChalenge(w, r)
+			code = SendForChalenge(w, r, label_ldap_stage)
 		}
 
 	} else {
 		//Wrong user and pass
-		code = RejectUser(w, r)
+		code = RejectUser(w, r, label_ldap_stage)
 	}
 
 	log.Printf("%v to %v for %v", code, r.RemoteAddr, username)

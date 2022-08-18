@@ -10,6 +10,10 @@ import (
 	"layeh.com/radius/rfc2865"
 )
 
+const (
+	label_otp_stage = "otp"
+)
+
 func otpHandler(w radius.ResponseWriter, r *radius.Request) {
 	paket := r.Packet
 	username := rfc2865.UserName_GetString(paket)
@@ -21,16 +25,16 @@ func otpHandler(w radius.ResponseWriter, r *radius.Request) {
 	if isStateValied(state, stateInPool) {
 		//log.Println("state is ok")
 		if IsOtpCodeValied(username, password) {
-			code = AcceptUser(w, r)
+			code = AcceptUser(w, r, label_otp_stage)
 			//delete user from statepool
 			inMemoryPool.Delete(username)
 		} else {
 
-			code = RejectUser(w, r)
+			code = RejectUser(w, r, label_otp_stage)
 		}
 		//state mismatch
 	} else {
-		code = RejectUser(w, r)
+		code = RejectUser(w, r, label_otp_stage)
 		log.Println("Warning, state mismatch for user", username)
 	}
 	log.Printf("%v to %v for %v", code, r.RemoteAddr, username)

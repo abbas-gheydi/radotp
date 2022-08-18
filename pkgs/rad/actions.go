@@ -12,7 +12,7 @@ import (
 
 var EnableMetrics bool
 
-func AcceptUser(w radius.ResponseWriter, r *radius.Request) (code radius.Code) {
+func AcceptUser(w radius.ResponseWriter, r *radius.Request, stage string) (code radius.Code) {
 	code = radius.CodeAccessAccept
 	paket := r.Packet.Response(code)
 	if state := rfc2865.State_GetString(r.Packet); state != "" {
@@ -21,12 +21,12 @@ func AcceptUser(w radius.ResponseWriter, r *radius.Request) (code radius.Code) {
 	}
 	AddVendorGroup(paket, r)
 	w.Write(paket)
-	go sendToMonitoring(rfc2865.UserName_GetString(r.Packet), "Accept")
+	go sendToMonitoring(rfc2865.UserName_GetString(r.Packet), stage, "Accept")
 
 	return
 }
 
-func RejectUser(w radius.ResponseWriter, r *radius.Request) (code radius.Code) {
+func RejectUser(w radius.ResponseWriter, r *radius.Request, stage string) (code radius.Code) {
 	code = radius.CodeAccessReject
 	paket := r.Packet.Response(code)
 	//set state in response packet
@@ -35,12 +35,12 @@ func RejectUser(w radius.ResponseWriter, r *radius.Request) (code radius.Code) {
 	}
 
 	w.Write(paket)
-	go sendToMonitoring(rfc2865.UserName_GetString(r.Packet), "Reject")
+	go sendToMonitoring(rfc2865.UserName_GetString(r.Packet), stage, "Reject")
 
 	return
 }
 
-func SendForChalenge(w radius.ResponseWriter, r *radius.Request) (code radius.Code) {
+func SendForChalenge(w radius.ResponseWriter, r *radius.Request, stage string) (code radius.Code) {
 	paket := r.Packet.Response(radius.CodeAccessChallenge)
 	username := rfc2865.UserName_GetString(r.Packet)
 	stateInOurPool, groupInOurpoll := inMemoryPool.Lookup(username)
@@ -52,7 +52,7 @@ func SendForChalenge(w radius.ResponseWriter, r *radius.Request) (code radius.Co
 	rfc2865.ReplyMessage_Set(paket, []byte("ENTER OTP CODE"))
 
 	w.Write(paket)
-	go sendToMonitoring(rfc2865.UserName_GetString(r.Packet), "Challenge")
+	go sendToMonitoring(rfc2865.UserName_GetString(r.Packet), stage, "Challenge")
 
 	return radius.CodeAccessChallenge
 
@@ -68,15 +68,15 @@ func AddVendorGroup(p *radius.Packet, r *radius.Request) {
 
 }
 
-func sendToMonitoring(username string, stat string) {
+func sendToMonitoring(username string, stage string, stat string) {
 	if EnableMetrics {
 		switch stat {
 		case "Accept":
-			monitoring.Accepted_users.Append(username)
+			monitoring.Accepted_users.Append(username, stage)
 		case "Reject":
-			monitoring.Rejected_users.Append(username)
+			monitoring.Rejected_users.Append(username, stage)
 		case "Challenge":
-			monitoring.Chalenged_users.Append(username)
+			monitoring.Chalenged_users.Append(username, stage)
 
 		}
 	}

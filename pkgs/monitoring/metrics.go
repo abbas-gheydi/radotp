@@ -10,44 +10,46 @@ const (
 	label_accepted  = "Accepted"
 	lablel_rejected = "Rejected"
 	label_challenge = "Chalenge"
+	abel_otp_stage  = "otp"
+	abel_ldap_stage = "active directory"
 )
 
 var (
 	userStatus_metric = promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "radius_response",
 		Help: "status of radius repsonse include (Accepted, Rejected, Chalenge)",
-	}, []string{"user", "state"})
+	}, []string{"user", "stage", "state"})
 )
 
 func make_metrics() {
 	userStatus_metric.Reset()
 
 	success := getMertricMap(&Accepted_users)
-	for user, count := range success {
-		userStatus_metric.WithLabelValues(user, label_accepted).Set(float64(count))
+	for username, count := range success {
+		userStatus_metric.WithLabelValues(username.Name, username.Stage, label_accepted).Set(float64(count))
 	}
 
 	reject := getMertricMap(&Rejected_users)
-	for user, count := range reject {
-		userStatus_metric.WithLabelValues(user, lablel_rejected).Set(float64(count))
+	for username, count := range reject {
+		userStatus_metric.WithLabelValues(username.Name, username.Stage, lablel_rejected).Set(float64(count))
 	}
 
 	challenge := getMertricMap(&Chalenged_users)
-	for user, count := range challenge {
-		userStatus_metric.WithLabelValues(user, label_challenge).Set(float64(count))
+	for username, count := range challenge {
+		userStatus_metric.WithLabelValues(username.Name, username.Stage, label_challenge).Set(float64(count))
 	}
 
 }
 
-func getMertricMap(storage users_storage) map[string]int {
+func getMertricMap(storage users_storage) map[user]int {
 
 	metricMap := convertSliceToMap(storage)
 	return metricMap
 
 }
 
-func convertSliceToMap(storage users_storage) map[string]int {
-	usersActivity := make(map[string]int)
+func convertSliceToMap(storage users_storage) map[user]int {
+	usersActivity := make(map[user]int)
 	for _, user := range storage.ReadAndDelete() {
 
 		// count users attempts
