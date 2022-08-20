@@ -10,8 +10,6 @@ const (
 	label_accepted  = "Accepted"
 	lablel_rejected = "Rejected"
 	label_challenge = "Chalenge"
-	abel_otp_stage  = "otp"
-	abel_ldap_stage = "active directory"
 )
 
 var (

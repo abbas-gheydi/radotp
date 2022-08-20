@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+  <head>
+
+
+<script src="/assets/js/jquery-3.2.1.slim.min.js"  crossorigin="anonymous"></script>
+<script src="/assets/js/popper.min.js"  crossorigin="anonymous"></script>
+<script src="/assets/js/bootstrap.min.js"  crossorigin="anonymous"></script>
+<script type="text/javascript" src="/assets/qr/qrcode.js"></script>
+
+
+    <title>OTP SERVER</title>
+
+
+    
+
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="/assets/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+
+
+  </head>
+  <body>
+
+
+    
+<header class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
+
+  <div class="dropdown d-inline-block" >
+  <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="flase" >
+   ADMIN
+  </button>
+  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+    <a class="dropdown-item" href="/">Manage users</a>
+    <a class="dropdown-item" href="/logs/">Logs</a>
+    <a class="dropdown-item" href="/edit/">Change password</a>
+    <a class="dropdown-item" href="/sign_out/">Sign out</a>
+  </div>
+   </div>
+</header>
+
+<form method="post">
+  <div class="row">
+    <div class="col">
+      <input type="text" class="form-control" placeholder="1h" name="timerange">
+    </div>
+    <div class="col">
+      <input type="text" class="form-control" placeholder="username" name="user">
+    </div>
+
+
+
+    <div class="col">
+    <select class="form-control" name="stage">
+      <option>.*</option>
+      <option>otp</option>
+      <option>active-directory</option>
+
+    </select>
+  </div>
+
+    <div class="col">
+    <select class="form-control" name="state">
+      <option>.*</option>
+      <option>accept</option>
+      <option>challenge</option>
+      <option>reject</option>
+    </select>
+    </div>
+
+
+    <div class="col">
+      <button type="submit" class="btn btn-primary">search</button>
+
+    </div>
+
+
+
+  </div>
+</form>
+
+<div class="container">
+
+  <br></br>
+
+
+<div style="white-space: pre">
+
+{{.}}
+</div>
+
+
+</div>
+
+
+
+
+</body>
+</html>

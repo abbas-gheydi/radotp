@@ -43,27 +43,17 @@
    ADMIN
   </button>
   <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-    <a class="dropdown-item" href="/sign_out/">Sign out</a>
+    <a class="dropdown-item" href="/">Manage users</a>
+    <a class="dropdown-item" href="/logs/">Logs</a>
     <a class="dropdown-item" href="/edit/">Change password</a>
+    <a class="dropdown-item" href="/sign_out/">Sign out</a>
+
+
   </div>
 </div>
 
 
 
-
-
-
-<!--
-  <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3" href="#">OTP SERVER</a>
-  <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
-  </button>
-  -->
-
-
-  <!--
-  <input class="form-control form-control-dark w-100" type="text" placeholder="Search" aria-label="Search">
-  -->
   
   <div class="navbar-nav">
     <div class="nav-item text-nowrap">
@@ -73,19 +63,8 @@
 
 
   </div>
-  
-  <!--
 
-  <div class="dropdown d-inline-block" >
-  <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="flase" >
-   ADMIN
-  </button>
-  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-    <a class="dropdown-item" href="/sign_out/">EXIT</a>
-    <a class="dropdown-item" href="/edit/">ADMIN</a>
-  </div>
-</div>
--->
+  
 
 
 </header>
@@ -107,8 +86,8 @@
 
   <form method="POST" id="usersform">
     <div class="form-group row">
-      <label for="username" class="col-sm-2 col-form-label">User Name</label>
-      <div class="col-sm-10">
+      <label for="username" class="col-7 col-form-label">User Name</label>
+      <div class="col-7">
         <input type="text" class="form-control" id="username" placeholder="UserName" name="username" required>
       </div>
     </div>

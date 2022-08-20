@@ -1,37 +1,59 @@
-<!--
 <!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Document</title>
-</head>
-<body>
-
-<form method="post">
-    <input type="text" name="current" placeholder="current password"><br>
-    <input type="text" name="new" placeholder="new password"><br>
-    <input type="text" name="repeat" placeholder="repeat new password"><br>
-    <input type="submit">
-</form>
-
-</body>
-</html>
--->
-<!DOCTYPE html>
-<html lang="en">
-<head>
+  <head>
 
 
-  <title>edit webadmin user</title>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
 <script src="/assets/js/jquery-3.2.1.slim.min.js"  crossorigin="anonymous"></script>
 <script src="/assets/js/popper.min.js"  crossorigin="anonymous"></script>
 <script src="/assets/js/bootstrap.min.js"  crossorigin="anonymous"></script>
 <script type="text/javascript" src="/assets/qr/qrcode.js"></script>
-</head>
-<body>
+
+
+    <title>OTP SERVER</title>
+
+
+    
+
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="/assets/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+
+
+  </head>
+  <body>
+
+
+    
+<header class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
+
+  <div class="dropdown d-inline-block" >
+  <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="flase" >
+   ADMIN
+  </button>
+  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+    <a class="dropdown-item" href="/">Manage users</a>
+    <a class="dropdown-item" href="/logs/">Logs</a>
+    <a class="dropdown-item" href="/edit/">Change password</a>
+    <a class="dropdown-item" href="/sign_out/">Sign out</a>
+  </div>
+</div>
+
+
+
+  
+  <div class="navbar-nav">
+    <div class="nav-item text-nowrap">
+      <a class="nav-link px-3" href="/sign_out/">Sign out</a>
+    </div>
+
+
+
+  </div>
+  
+
+
+</header>
+
 <div class="container">
   <h2>change password</h2>
   <form method="post">

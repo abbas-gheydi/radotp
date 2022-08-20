@@ -37,7 +37,7 @@ func User_PassHandler(w radius.ResponseWriter, r *radius.Request) {
 		code = RejectUser(w, r, label_ldap_stage)
 	}
 
-	log.Printf("%v to %v for %v", code, r.RemoteAddr, username)
+	log.Printf("%v to %v for %v stage %v", code, r.RemoteAddr, username, label_ldap_stage)
 
 }
 

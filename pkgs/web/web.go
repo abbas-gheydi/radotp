@@ -146,6 +146,7 @@ func Start() {
 
 	http.Handle("/", MustAuth(manageUsers))
 	http.Handle("/edit/", MustAuth(editAdminUser))
+	http.Handle("/logs/", MustAuth(logs))
 
 	log.Println("Web Interface Listen on:", ListenAddr)
 

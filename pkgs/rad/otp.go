@@ -37,7 +37,7 @@ func otpHandler(w radius.ResponseWriter, r *radius.Request) {
 		code = RejectUser(w, r, label_otp_stage)
 		log.Println("Warning, state mismatch for user", username)
 	}
-	log.Printf("%v to %v for %v", code, r.RemoteAddr, username)
+	log.Printf("%v to %v for %v stage %v", code, r.RemoteAddr, username, label_otp_stage)
 }
 
 func IsOtpCodeValied(username string, password string) bool {
