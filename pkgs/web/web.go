@@ -11,6 +11,7 @@ import (
 
 	"github.com/Abbas-gheydi/radotp/pkgs/authentiate"
 	"github.com/Abbas-gheydi/radotp/pkgs/storage"
+	"github.com/gorilla/mux"
 )
 
 var ListenAddr = "0.0.0.0:8080"
@@ -138,17 +139,19 @@ func manageUsers(w http.ResponseWriter, r *http.Request) {
 func Start() {
 
 	jwtHmacSecret = []byte(generateRandomString())
+	router := mux.NewRouter()
 
-	http.Handle("/assets/", http.FileServer(http.FS(assets)))
-	//http.HandleFunc("/", manageUsers)
-	http.HandleFunc("/login/", login)
-	http.HandleFunc("/sign_out/", signOut)
+	//http.Handle("/assets/", http.FileServer(http.FS(assets)))
+	fs := http.FileServer(http.FS(assets))
+	router.PathPrefix("/assets/").Handler(fs)
+	router.HandleFunc("/login/", login)
+	router.HandleFunc("/sign_out/", signOut)
 
-	http.Handle("/", MustAuth(manageUsers))
-	http.Handle("/edit/", MustAuth(editAdminUser))
-	http.Handle("/logs/", MustAuth(logs))
+	router.Handle("/", MustAuth(manageUsers))
+	router.Handle("/edit/", MustAuth(editAdminUser))
+	router.Handle("/logs/", MustAuth(logs))
 
 	log.Println("Web Interface Listen on:", ListenAddr)
 
-	http.ListenAndServe(ListenAddr, nil)
+	http.ListenAndServe(ListenAddr, router)
 }
