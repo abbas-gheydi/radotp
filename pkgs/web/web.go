@@ -151,6 +151,8 @@ func Start() {
 	router.Handle("/edit/", MustAuth(editAdminUser))
 	router.Handle("/logs/", MustAuth(logs))
 
+	router.HandleFunc("/api/v1/{userName}", apiGetUser).Methods("GET")
+
 	log.Println("Web Interface Listen on:", ListenAddr)
 
 	http.ListenAndServe(ListenAddr, router)
