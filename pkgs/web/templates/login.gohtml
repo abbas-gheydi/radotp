@@ -1,34 +1,43 @@
 <!DOCTYPE html>
-<!--[if lt IE 7 ]> <html lang="en" class="ie6 ielt8"> <![endif]-->
-<!--[if IE 7 ]>    <html lang="en" class="ie7 ielt8"> <![endif]-->
-<!--[if IE 8 ]>    <html lang="en" class="ie8"> <![endif]-->
-<!--[if (gte IE 9)|!(IE)]><!--> <html lang="en"> <!--<![endif]-->
-<head>
-<meta charset="utf-8">
-<title>RadOTP login</title>
-<link rel="stylesheet" type="text/css" href="/assets/css/login.css" />
-</head>
-<body>
-<div class="container">
-  <section id="content">
-    <form method="post">
-      <h1>RadOTP</h1>
-      <div>
-        <input type="text" placeholder="Username" required="" name=user id="username" required/>
+<html lang="es" dir="ltr">
+  <head>
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="/assets/css/modern_login.css"><link href="/assets/css/Montserrat-400-700-800-swap.css" rel="stylesheet">
+  </head>
+  <body>
+    <div class="main">
+      <div class="container a-container" id="a-container">
+
       </div>
-      <div>
-        <input type="password" placeholder="Password" required="" name=pass id="password" required/>
+      <div class="container b-container" id="b-container">
+        <form class="form" id="b-form" method="post" >
+          <h2 class="form_title title">Sign in to RadOTP</h2>
+          <input class="form__input" type="text" placeholder="username" name=user>
+          <input class="form__input" type="password" placeholder="Password" name=pass>
+          
+          <input type="submit"  value="SIGN IN" class="form__button button" />
+        </form>
       </div>
-      <div>
-        <input type="submit" value="Log in" />
-        <!-- 
-        <a href="#">Lost your password?</a>
-        <a href="#">Register</a>
-        -->
+      <div class="switch" id="switch-cnt">
+        <div class="switch__circle"></div>
+        <div class="switch__circle switch__circle--t"></div>
+        <div class="switch__container" id="switch-c1">
+          
+          <h2 class="switch__title title">    RadOTP    </h2>
+
+          <p class="switch__description description">please login with your credentials</p>
+          <button class="switch__button button switch-btn">SIGN IN</button>
+        </div>
+        <div class="switch__container is-hidden" id="switch-c2">
+          <!-- <h2 class="switch__title title">Hello Friend !</h2> -->
+          <h2 class="switch__title title">    RadOTP    </h2>
+
+          <p class="switch__description description">"SSL VPN" authentication with two-factor authentication mechanisms.</p>
+          <button class="switch__button button switch-btn">Ok</button>
+        </div>
       </div>
-    </form><!-- form -->
-    
-  </section><!-- content -->
-</div><!-- container -->
-</body>
+    </div>
+    <script src="/assets/js/modern_login.js"></script>
+  </body>
 </html>
