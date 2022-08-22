@@ -1,77 +1,31 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet"  href="/assets/css/chpwd.css">
+    <title>change password</title>
+</head>
 
+    <body id="particles-js"></body>
+<div class="animated bounceInDown">
+  <div class="container">
+    <span class="error animated tada" id="msg"></span>
+    <form name="form1" class="box" method="post" onsubmit="required()">
 
-<script src="/assets/js/jquery-3.2.1.slim.min.js"  crossorigin="anonymous"></script>
-<script src="/assets/js/popper.min.js"  crossorigin="anonymous"></script>
-<script src="/assets/js/bootstrap.min.js"  crossorigin="anonymous"></script>
-<script type="text/javascript" src="/assets/qr/qrcode.js"></script>
+        <input type="password" name="current" placeholder="Current Passsword" autocomplete="off" name="pwd">
+        <input type="password" name="pwd" id="pwd" placeholder="New Password" autocomplete="off">
+        <i class="typcn typcn-eye" id="eye"></i>
+        <input type="password" name="cpwd" placeholder="Confirm Passsword" id="cpwd" autocomplete="off">
+   
+        <input type="submit" value="Save" class="btn1">
+      </form>
+      
+  </div> 
 
-
-    <title>OTP SERVER</title>
-
-
-    
-
-    <!-- Bootstrap core CSS -->
-    <link rel="stylesheet" href="/assets/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-
-
-
-  </head>
-  <body>
-
-
-    
-<header class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
-
-  <div class="dropdown d-inline-block" >
-  <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="flase" >
-   ADMIN
-  </button>
-  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-    <a class="dropdown-item" href="/">Manage users</a>
-    <a class="dropdown-item" href="/logs/">Logs</a>
-    <a class="dropdown-item" href="/edit/">Change password</a>
-    <a class="dropdown-item" href="/sign_out/">Sign out</a>
-  </div>
 </div>
 
-
-
-  
-  <div class="navbar-nav">
-    <div class="nav-item text-nowrap">
-      <a class="nav-link px-3" href="/sign_out/">Sign out</a>
-    </div>
-
-
-
-  </div>
-  
-
-
-</header>
-
-<div class="container">
-  <h2>change password</h2>
-  <form method="post">
-    <div class="form-group">
-      <label for="email">Current password:</label>
-      <input type="password" class="form-control" id="current" placeholder="Enter current password" name="current" required />
-    </div>
-    <div class="form-group">
-      <label for="pwd">Password:</label>
-      <input type="password" class="form-control" id="pwd" placeholder="Enter password" name="pwd" required />
-    </div>
-    <div class="form-group">
-      <label for="cpwd">Cofirm Password:</label>
-      <input type="password" class="form-control" id="cpwd" placeholder="Enter Confirm password" name="cpwd" required />
-    </div>
-    <button type="submit" class="btn btn-primary">Submit</button>
-  </form>
-</div>
   <script>
   var password = document.getElementById("pwd");
   var confirm_password = document.getElementById("cpwd");
@@ -86,6 +40,17 @@
 
 	password.onchange = validatePassword;
 	confirm_password.onkeyup = validatePassword;
+
+
+function required(){
+var empt = document.forms["form1"]["current"].value;
+if (empt == "")
+{
+alert("Please enter current password");
+return false;
+}
+
+}
   </script>
-</body>
+
 </html>
