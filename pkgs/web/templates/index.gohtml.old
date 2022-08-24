@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+  <head>
+
+
+<script src="/assets/js/jquery-3.2.1.slim.min.js"  crossorigin="anonymous"></script>
+<script src="/assets/js/popper.min.js"  crossorigin="anonymous"></script>
+<script src="/assets/js/bootstrap.min.js"  crossorigin="anonymous"></script>
+<script type="text/javascript" src="/assets/qr/qrcode.js"></script>
+
+
+    <title>OTP SERVER</title>
+
+
+    
+
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="/assets/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+
+
+  </head>
+  <body>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+<header class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
+
+  <div class="dropdown d-inline-block" >
+  <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="flase" >
+   ADMIN
+  </button>
+  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+    <a class="dropdown-item" href="/">Manage users</a>
+    <a class="dropdown-item" href="/logs/">Logs</a>
+    <a class="dropdown-item" href="/edit/">Change password</a>
+    <a class="dropdown-item" href="/sign_out/">Sign out</a>
+
+
+  </div>
+</div>
+
+
+
+  
+  <div class="navbar-nav">
+    <div class="nav-item text-nowrap">
+      <a class="nav-link px-3" href="/sign_out/">Sign out</a>
+    </div>
+
+
+
+  </div>
+
+  
+
+
+</header>
+
+
+
+
+<br></br>
+<br></br>
+
+<br></br>
+
+<br></br>
+
+<br></br>
+
+<div class="container" >
+
+
+  <form method="POST" id="usersform">
+    <div class="form-group row">
+      <label for="username" class="col-7 col-form-label">User Name</label>
+      <div class="col-7">
+        <input type="text" class="form-control" id="username" placeholder="UserName" name="username" required>
+      </div>
+    </div>
+
+  <p>Please choose options:</p>
+  <input type="radio" id="createuser" name="tasks" value="createuser">
+  <label for="createuser">Enable OTP</label><br>
+  <input type="radio" id="updateuser" name="tasks" value="updateuser">
+  <label for="updateuser">Force regenerate</label><br>
+  <input type="radio" id="searchuser" name="tasks" value="searchuser">
+  <label for="searchuser">Search</label><br>
+  <input type="radio" id="deleteuser" name="tasks" value="deleteuser">
+  <label for="deleteuser">Disable OTP</label>
+
+  <br>  
+
+    <div class="form-group row">
+      <div class="col-sm-10">
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </div>
+    </div>
+
+  </form>
+        <script>
+         function newFunction() {
+            document.getElementById("usersform").reset();
+         }
+      </script>
+  <br></br>
+
+{{if and (.Code) (not .Err)}}
+OTP code for {{.UserName}} is: {{.Code}}
+
+<!-- qr code -->
+
+<div id="qrcode" style="width:100px; height:100px; margin-top:15px;"></div>
+
+<script type="text/javascript">
+var qrcode = new QRCode(document.getElementById("qrcode"), {
+	width : 100,
+	height : 100
+});
+
+
+	qrcode.makeCode({{.Qr}});
+
+</script>
+
+
+
+<!-- qr code -->
+
+
+
+
+
+
+
+
+
+{{end}}
+
+
+{{if .Err}}
+{{.Err}} {{ .UserName}}
+{{end}}
+
+
+{{if .Result}}
+{{.Result}}
+{{end}}
+
+
+
+
+
+
+</div>
+
+
+
+
+
+<br>
+
+
+
+
+
+  </body>
+</html>

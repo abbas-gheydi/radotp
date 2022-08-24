@@ -1,0 +1,204 @@
+.form__group {
+    position: relative;
+    padding: 15px 0 0;
+    margin-top: 10px;
+    width: 50%;
+  }
+  
+  .form__field {
+    font-family: inherit;
+    width: 100%;
+    border: 0;
+    border-bottom: 2px solid #9b9b9b;
+    outline: 0;
+    font-size: 1.3rem;
+    color: #fff;
+    padding: 7px 0;
+    background: transparent;
+    transition: border-color 0.2s;
+  }
+  .form__field::placeholder {
+    color: transparent;
+  }
+  .form__field:placeholder-shown ~ .form__label {
+    font-size: 1.3rem;
+    cursor: text;
+    top: 20px;
+  }
+  
+  .form__label {
+    position: absolute;
+    top: 0;
+    display: block;
+    transition: 0.2s;
+    font-size: 1rem;
+    color: #ffff;
+  }
+  
+  .form__field:focus {
+    padding-bottom: 6px;
+    font-weight: 700;
+    border-width: 3px;
+    border-image: linear-gradient(to right, #ffff, rgb(109, 137, 222));
+    border-image-slice: 1;
+  }
+  .form__field:focus ~ .form__label {
+    position: absolute;
+    top: 0;
+    display: block;
+    transition: 0.2s;
+    font-size: 1rem;
+    color: #ffff;
+    font-weight: 700;
+  }
+  
+  /* reset input */
+  .form__field:required, .form__field:invalid {
+    box-shadow: none;
+  }
+  
+  /* demo */
+  body {
+    font-family: "Poppins", sans-serif;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-size: 1.5rem;
+    background-color: #748ffc;
+  }
+
+
+
+
+  :root {
+    --gray: #636e72;
+    --dark-gray: #88dcf3f3;
+    --light-gray: #2e3b40;
+    --x-light-gray: #dfe6e9;
+    --gradient: linear-gradient(#0d50b6, #7fb3ef);
+  }
+  
+
+  section {
+    margin-top: 25px;
+    display: flex;
+    align-items: center;
+    gap: 1em;
+    background: var(--dark-gray);
+    color: var(--light-gray);
+    padding: 1em;
+    border-radius: 0.5em;
+    box-shadow: 0 0 1em 0 rgba(0, 0, 0, 0.26);
+  }
+  
+  input,
+  label {
+    cursor: pointer;
+  }
+  
+
+  label {
+    font-size: 1em;
+  }
+  label:hover {
+    color: var(--x-light-gray);
+  }
+  
+  /* CORE STYLES */
+  input {
+    -webkit-appearance: none;
+       -moz-appearance: none;
+            appearance: none;
+    width: 1em;
+    height: 1em;
+    border: 0.1em solid var(--light-gray);
+    font: inherit;
+    margin-bottom: -0.125em;
+  }
+  input[type=radio] {
+    border-radius: 50%;
+  }
+  input[type=checkbox] {
+    border-radius: 0.25em;
+  }
+  input:checked {
+    border-color: transparent;
+    background: var(--gradient) border-box;
+    box-shadow: 0 0 0 0.1em inset var(--dark-gray);
+  }
+  input:not(:checked):hover {
+    border-color: transparent;
+    background: linear-gradient(var(--dark-gray), var(--dark-gray)) padding-box, var(--gradient) border-box;
+  }
+
+
+
+
+  @import url('/assets/css/poppings-wght.css');
+
+
+
+button{
+    margin-top: 20px;
+    width: 270px;
+    height: 80px;
+    border: none;
+    outline: none;
+    background: rgb( 33, 41, 66 );
+    color: #fff;
+    font-size: 22px;
+    border-radius: 40px;
+    text-align: center;
+    box-shadow: 0 6px 20px -5px rgba(0,0,0,0.4);
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.check-box{
+    width: 80px;
+    height: 80px;
+    border-radius: 40px;
+    box-shadow: 0 0 12px -2px rgba(0,0,0,0.5);
+    position: absolute;
+    top: 0;
+    right: -40px;
+    opacity: 0;
+}
+
+.check-box svg{
+    width: 40px;
+    margin: 20px;
+}
+
+svg path{
+    stroke-width: 3;
+    stroke: #fff;
+    stroke-dasharray: 34;
+    stroke-dashoffset: 34;
+    stroke-linecap: round;
+}
+
+.active{
+    background: var(--dark-gray);
+    transition: 1s;
+}
+
+.active .check-box{
+    right: 0;
+    opacity: 1;
+    transition: 1s;
+}
+
+.active p{
+    margin-right: 125px;
+    transition: 1s;
+}
+
+.active svg path{
+    stroke-dashoffset: 0;
+    transition: 1s;
+    transition-delay: 1s;
+}

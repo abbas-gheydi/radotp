@@ -77,7 +77,7 @@ func createuser(user *userCode) {
 	user.Err = storage.Set(user.UserName, user.Code)
 	if user.Err != nil {
 		if strings.Contains(user.Err.Error(), "duplicate key value violates unique constraint \"otps_username_key\"") {
-			user.Err = fmt.Errorf("already exists")
+			user.Err = fmt.Errorf("already exists:")
 		}
 
 		log.Println("errorr opts.err", user.Err)
@@ -97,7 +97,7 @@ func deleteuser(user *userCode) {
 	if user.Err != nil {
 		log.Println("errorr opts.err", user.Err)
 	} else {
-		user.Result = user.UserName + " deleted"
+		user.Result = "Disabled OTP Code for User " + user.UserName
 	}
 }
 func searchuser(user *userCode) {
