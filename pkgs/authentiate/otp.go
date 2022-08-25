@@ -12,12 +12,13 @@ type otpProvider struct {
 	OtpUser  *gotp.TOTP
 	secret   string
 	username string
+	err      error
 }
 
 func (o *otpProvider) getSecret() {
 	//o.secret := db.getsecret(o.username)
 	//o.secret = "TTVJP2C4XPLJZDVSGORIFHE552"
-	o.secret = storage.Get(o.username)
+	o.secret, o.err = storage.Get(o.username)
 
 }
 func (o *otpProvider) make() {
@@ -30,7 +31,9 @@ func IsOtpCodeCurrect(username string, otpcode string) bool {
 	var user otpProvider
 	user.username = username
 	user.make()
-	//log.Println("current one-time password is:", user.OtpUser.Now())
+	if user.err != nil {
+		return false
+	}
 	return user.OtpUser.Verify(otpcode, int(time.Now().Unix()))
 
 }

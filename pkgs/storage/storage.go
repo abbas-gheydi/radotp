@@ -1,6 +1,10 @@
 package storage
 
-import "gorm.io/gorm"
+import (
+	"errors"
+
+	"gorm.io/gorm"
+)
 
 type otpTable interface {
 	Set(username string, secret string) error
@@ -49,8 +53,12 @@ func Update(username string, secret string) error {
 func Delete(username string) error {
 	return otpDatabaseEngine.Delete(username)
 }
-func Get(username string) (password string) {
-	return otpDatabaseEngine.Get(username)
+func Get(username string) (password string, err error) {
+	password = otpDatabaseEngine.Get(username)
+	if username == "" || password == "" {
+		return password, errors.New("user or password is empty")
+	}
+	return password, nil
 }
 
 func GetAdminPassword(uname string) (password string) {
