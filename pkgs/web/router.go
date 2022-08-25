@@ -1,0 +1,32 @@
+package web
+
+import (
+	"log"
+	"net/http"
+
+	"github.com/gorilla/mux"
+)
+
+func StartRouter() {
+
+	jwtHmacSecret = []byte(generateRandomString())
+	router := mux.NewRouter()
+
+	//http.Handle("/assets/", http.FileServer(http.FS(assets)))
+	fs := http.FileServer(http.FS(assets))
+	router.PathPrefix("/assets/").Handler(serveAssets(fs))
+	router.HandleFunc("/login/", login)
+	router.HandleFunc("/sign_out/", signOut)
+
+	router.Handle("/", MustAuth(manageUsers))
+	router.Handle("/edit/", MustAuth(editAdminUser))
+	router.Handle("/logs/", MustAuth(logs))
+	router.Handle("/header/", MustAuth(serverHeader))
+
+	router.HandleFunc("/api/v1/{username}", apiGetUser).Methods("GET")
+
+	log.Println("Web Interface Listen on:", ListenAddr)
+
+	http.ListenAndServe(ListenAddr, router)
+
+}

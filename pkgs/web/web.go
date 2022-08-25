@@ -11,7 +11,6 @@ import (
 
 	"github.com/Abbas-gheydi/radotp/pkgs/authentiate"
 	"github.com/Abbas-gheydi/radotp/pkgs/storage"
-	"github.com/gorilla/mux"
 )
 
 var ListenAddr = "0.0.0.0:8080"
@@ -88,21 +87,22 @@ func updateuser(user *userCode) {
 	user.Code, user.Qr = authentiate.NewOtpUser(user.UserName, QrIssuer)
 	user.Err = storage.Update(user.UserName, user.Code)
 	if user.Err != nil {
-		log.Println("errorr opts.err", user.Err)
+		log.Println("updateuser", user.Err)
 	}
 }
 
 func deleteuser(user *userCode) {
 	user.Err = storage.Delete(user.UserName)
 	if user.Err != nil {
-		log.Println("errorr opts.err", user.Err)
+		log.Println("deleteuser", user.Err)
 	} else {
 		user.Result = "Disabled OTP Code for User " + user.UserName
 	}
 }
 func searchuser(user *userCode) {
-	SearchResualt := storage.Get(user.UserName)
-	if SearchResualt == "" {
+	SearchResualt, getErr := storage.Get(user.UserName)
+	if SearchResualt == "" || getErr != nil {
+		log.Println("searchuser error", getErr)
 		user.Result = "user not found"
 	} else {
 		user.Result = "user has otp code"
@@ -145,27 +145,4 @@ func serveAssets(next http.Handler) http.Handler {
 
 		next.ServeHTTP(w, r)
 	})
-}
-
-func Start() {
-
-	jwtHmacSecret = []byte(generateRandomString())
-	router := mux.NewRouter()
-
-	//http.Handle("/assets/", http.FileServer(http.FS(assets)))
-	fs := http.FileServer(http.FS(assets))
-	router.PathPrefix("/assets/").Handler(serveAssets(fs))
-	router.HandleFunc("/login/", login)
-	router.HandleFunc("/sign_out/", signOut)
-
-	router.Handle("/", MustAuth(manageUsers))
-	router.Handle("/edit/", MustAuth(editAdminUser))
-	router.Handle("/logs/", MustAuth(logs))
-	router.Handle("/header/", MustAuth(serverHeader))
-
-	router.HandleFunc("/api/v1/{userName}", apiGetUser).Methods("GET")
-
-	log.Println("Web Interface Listen on:", ListenAddr)
-
-	http.ListenAndServe(ListenAddr, router)
 }

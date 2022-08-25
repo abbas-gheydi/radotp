@@ -59,7 +59,7 @@ func main() {
 		go monitoring.Start()
 	}
 
-	go web.Start()
+	go web.StartRouter()
 
 	rad.StartRadius()
 
