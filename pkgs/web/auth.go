@@ -128,25 +128,6 @@ func login(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func editAdminUser(w http.ResponseWriter, r *http.Request) {
-	loginTemplate := &templateHandler{filename: "edit.gohtml"}
-
-	if r.Method == http.MethodPost {
-		currenPassword := r.FormValue("current")
-		newPassword := r.FormValue("pwd")
-		//loginTemplate.options = opts
-		if CheckWebAdminPass("admin", currenPassword) {
-			storage.SetAdminPassword(newPassword)
-			log.Println("webadmin password updated")
-			setExpiredCookie(w, "user")
-			http.Redirect(w, r, "/", http.StatusFound)
-		}
-	}
-
-	loginTemplate.ServeHTTP(w, r)
-
-}
-
 func signOut(w http.ResponseWriter, r *http.Request) {
 	setExpiredCookie(w, "user")
 	http.Redirect(w, r, "/", http.StatusFound)
