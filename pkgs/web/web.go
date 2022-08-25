@@ -161,6 +161,7 @@ func Start() {
 	router.Handle("/", MustAuth(manageUsers))
 	router.Handle("/edit/", MustAuth(editAdminUser))
 	router.Handle("/logs/", MustAuth(logs))
+	router.Handle("/header/", MustAuth(serverHeader))
 
 	router.HandleFunc("/api/v1/{userName}", apiGetUser).Methods("GET")
 
