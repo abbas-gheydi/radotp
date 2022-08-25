@@ -77,17 +77,20 @@ func (p postgresOtp) Delete(username string) error {
 
 }
 
-func (p postgresOtp) Get(username string) (password string) {
+func (p postgresOtp) Get(username string) (password string, err error) {
 
 	otpUser := otps{Username: username}
 
-	db_otp.First(&otpUser, "Username = ?", username)
+	tx := db_otp.First(&otpUser, "Username = ?", username)
+	if tx.Error != nil {
+		return "", tx.Error
+	}
 
 	if otpUser.Secret != "" {
 
 		password = aesDecrypt(otpUser.Secret, generateEncKey(username))
 	}
-	return password
+	return password, nil
 
 }
 

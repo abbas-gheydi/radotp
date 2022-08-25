@@ -46,7 +46,4 @@ func apiGetUser(w http.ResponseWriter, r *http.Request) {
 
 	makeJsonResponse(w, userInJson, respCode)
 
-	//if user
-	//fmt.Fprint(w, user.Result)
-
 }

@@ -10,7 +10,7 @@ type otpTable interface {
 	Set(username string, secret string) error
 	Update(username string, secret string) error
 	Delete(username string) error
-	Get(username string) (password string)
+	Get(username string) (password string, err error)
 	Connect() *gorm.DB
 	Migrate()
 }
@@ -54,7 +54,10 @@ func Delete(username string) error {
 	return otpDatabaseEngine.Delete(username)
 }
 func Get(username string) (password string, err error) {
-	password = otpDatabaseEngine.Get(username)
+	password, err = otpDatabaseEngine.Get(username)
+	if err != nil {
+		return password, err
+	}
 	if username == "" || password == "" {
 		return password, errors.New("user or password is empty")
 	}

@@ -104,6 +104,11 @@ func searchuser(user *userCode) {
 	if SearchResualt == "" || getErr != nil {
 		log.Println("searchuser error", getErr)
 		user.Result = "user not found"
+		if !strings.Contains(getErr.Error(), "record not found") {
+			user.Err = getErr
+
+		}
+
 	} else {
 		user.Result = "user has otp code"
 	}
