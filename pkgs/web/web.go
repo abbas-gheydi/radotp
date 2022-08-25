@@ -136,6 +136,17 @@ func manageUsers(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func serveAssets(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasSuffix(r.URL.Path, "/") {
+			http.NotFound(w, r)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
 func Start() {
 
 	jwtHmacSecret = []byte(generateRandomString())
@@ -143,7 +154,7 @@ func Start() {
 
 	//http.Handle("/assets/", http.FileServer(http.FS(assets)))
 	fs := http.FileServer(http.FS(assets))
-	router.PathPrefix("/assets/").Handler(fs)
+	router.PathPrefix("/assets/").Handler(serveAssets(fs))
 	router.HandleFunc("/login/", login)
 	router.HandleFunc("/sign_out/", signOut)
 
