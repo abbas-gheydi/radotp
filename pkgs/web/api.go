@@ -36,7 +36,7 @@ func apiCreateUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func apiDeleteUser(w http.ResponseWriter, r *http.Request) {
-	apiActionsfunc(w, r, deleteuser, http.StatusCreated)
+	apiActionsfunc(w, r, deleteuser, http.StatusOK)
 }
 
 func apiUpdateUser(w http.ResponseWriter, r *http.Request) {
