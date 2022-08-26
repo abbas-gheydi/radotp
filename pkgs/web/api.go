@@ -16,31 +16,31 @@ type JsonUSer struct {
 
 type apiActions func(*userCode)
 
-func apiActionsfunc(w http.ResponseWriter, r *http.Request, action apiActions) {
+func apiActionsfunc(w http.ResponseWriter, r *http.Request, action apiActions, okResponseCode int) {
 
 	user := getUserNameParamFromUrl(r)
 	action(&user)
-	respCode := createUserResponseHandler(&user, http.StatusOK)
+	respCode := createUserResponseHandler(&user, okResponseCode)
 	userInJson := newjsonUser(user.UserName, user.Result, user.Code)
 	makeJsonResponse(w, userInJson, respCode)
 
 }
 
 func apiGetUser(w http.ResponseWriter, r *http.Request) {
-	apiActionsfunc(w, r, searchuser)
+	apiActionsfunc(w, r, searchuser, http.StatusOK)
 }
 
 func apiCreateUser(w http.ResponseWriter, r *http.Request) {
-	apiActionsfunc(w, r, createuser)
+	apiActionsfunc(w, r, createuser, http.StatusCreated)
 
 }
 
 func apiDeleteUser(w http.ResponseWriter, r *http.Request) {
-	apiActionsfunc(w, r, deleteuser)
+	apiActionsfunc(w, r, deleteuser, http.StatusCreated)
 }
 
 func apiUpdateUser(w http.ResponseWriter, r *http.Request) {
-	apiActionsfunc(w, r, updateuser)
+	apiActionsfunc(w, r, updateuser, http.StatusCreated)
 }
 
 func getUserNameParamFromUrl(r *http.Request) userCode {
