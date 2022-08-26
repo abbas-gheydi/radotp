@@ -75,7 +75,7 @@ func createUserResponseHandler(user *userCode, okResponseCode int) (respCode int
 		respCode = okResponseCode
 
 	case user_not_found:
-		respCode = okResponseCode
+		respCode = http.StatusNotFound
 
 	case disabled_OTP_Code_for_User:
 		respCode = okResponseCode
