@@ -34,6 +34,16 @@ func apiCreateUser(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func apiDeleteUser(w http.ResponseWriter, r *http.Request) {
+
+	user := getUserNameParamFromUrl(r)
+	deleteuser(&user)
+	respCode := createUserResponseHandler(&user, http.StatusCreated)
+	userInJson := newjsonUser(user.UserName, user.Result, user.Code)
+	makeJsonResponse(w, userInJson, respCode)
+
+}
+
 func getUserNameParamFromUrl(r *http.Request) userCode {
 	params := mux.Vars(r)
 	userName := params["username"]
@@ -68,11 +78,14 @@ func createUserResponseHandler(user *userCode, okResponseCode int) (respCode int
 	case user_not_found:
 		respCode = okResponseCode
 
+	case disabled_OTP_Code_for_User:
+		respCode = okResponseCode
+
 	case already_exists:
 		respCode = http.StatusMethodNotAllowed
 
 	default:
-		user.Result = "false"
+		user.Result = "error"
 		respCode = http.StatusInternalServerError
 
 	}

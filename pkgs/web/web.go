@@ -14,9 +14,10 @@ import (
 )
 
 const (
-	user_has_otp_code string = "user has otp code"
-	user_not_found    string = "user not found"
-	already_exists    string = "already exists"
+	user_has_otp_code          string = "user has otp code"
+	user_not_found             string = storage.User_not_found
+	already_exists             string = "already exists"
+	disabled_OTP_Code_for_User string = "Disabled OTP Code for User"
 )
 
 var ListenAddr = "0.0.0.0:8080"
@@ -87,7 +88,7 @@ func createuser(user *userCode) {
 			user.Err = fmt.Errorf(already_exists)
 		}
 
-		log.Println("createuser", user.Err)
+		log.Println("createUser", user.Err)
 	}
 }
 
@@ -95,22 +96,22 @@ func updateuser(user *userCode) {
 	user.Code, user.Qr = authentiate.NewOtpUser(user.UserName, QrIssuer)
 	user.Err = storage.Update(user.UserName, user.Code)
 	if user.Err != nil {
-		log.Println("updateuser", user.Err)
+		log.Println("updateUser", user.Err)
 	}
 }
 
 func deleteuser(user *userCode) {
 	user.Err = storage.Delete(user.UserName)
 	if user.Err != nil {
-		log.Println("deleteuser", user.Err)
+		log.Println("deleteUser", user.Err)
 	} else {
-		user.Result = "Disabled OTP Code for User " + user.UserName
+		user.Result = disabled_OTP_Code_for_User
 	}
 }
 func searchuser(user *userCode) {
 	SearchResualt, getErr := storage.Get(user.UserName)
 	if SearchResualt == "" || getErr != nil {
-		log.Println("searchuser error", getErr)
+		log.Println("searchUser error", getErr)
 		user.Result = user_not_found
 		if !strings.Contains(getErr.Error(), "record not found") {
 			user.Err = getErr

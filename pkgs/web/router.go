@@ -25,6 +25,7 @@ func StartRouter() {
 
 	router.Handle("/api/v1/{username}", restApiMustAuth(apiGetUser)).Methods(http.MethodGet)
 	router.Handle("/api/v1/{username}", restApiMustAuth(apiCreateUser)).Methods(http.MethodPut)
+	router.Handle("/api/v1/{username}", restApiMustAuth(apiDeleteUser)).Methods(http.MethodDelete)
 
 	log.Println("Web Interface Listen on:", ListenAddr)
 

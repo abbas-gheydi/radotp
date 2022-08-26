@@ -11,6 +11,10 @@ import (
 	"gorm.io/gorm"
 )
 
+const (
+	User_not_found string = "user not found"
+)
+
 var db_otp *gorm.DB
 var once sync.Once
 
@@ -50,7 +54,7 @@ func (p postgresOtp) Update(username string, secret string) error {
 		log.Println("*****db.go", tx.Error)
 	}
 	if tx.RowsAffected != 1 {
-		tx.AddError(errors.New("user not found "))
+		tx.AddError(errors.New(User_not_found))
 		log.Println(username, " not found")
 
 	} else {
@@ -70,7 +74,7 @@ func (p postgresOtp) Delete(username string) error {
 		log.Println("otp code for user ", username, " removed from db")
 	}
 	if tx.RowsAffected != 1 {
-		tx.AddError(errors.New("user not found "))
+		tx.AddError(errors.New(User_not_found))
 	}
 
 	return tx.Error
