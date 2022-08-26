@@ -14,7 +14,27 @@ type JsonUSer struct {
 	ResponseCode int    `json:"-"`
 }
 
-func getUserNameParamFromurl(r *http.Request) userCode {
+func apiGetUser(w http.ResponseWriter, r *http.Request) {
+
+	user := getUserNameParamFromUrl(r)
+	searchuser(&user)
+	respCode := createUserResponseHandler(&user, http.StatusOK)
+	userInJson := newjsonUser(user.UserName, user.Result, user.Code)
+	makeJsonResponse(w, userInJson, respCode)
+
+}
+
+func apiCreateUser(w http.ResponseWriter, r *http.Request) {
+
+	user := getUserNameParamFromUrl(r)
+	createuser(&user)
+	respCode := createUserResponseHandler(&user, http.StatusCreated)
+	userInJson := newjsonUser(user.UserName, user.Result, user.Code)
+	makeJsonResponse(w, userInJson, respCode)
+
+}
+
+func getUserNameParamFromUrl(r *http.Request) userCode {
 	params := mux.Vars(r)
 	userName := params["username"]
 	user := userCode{UserName: userName}
@@ -57,24 +77,4 @@ func createUserResponseHandler(user *userCode, okResponseCode int) (respCode int
 
 	}
 	return
-}
-
-func apiGetUser(w http.ResponseWriter, r *http.Request) {
-
-	user := getUserNameParamFromurl(r)
-	searchuser(&user)
-	respCode := createUserResponseHandler(&user, http.StatusOK)
-	userInJson := newjsonUser(user.UserName, user.Result, user.Code)
-	makeJsonResponse(w, userInJson, respCode)
-
-}
-
-func apiCreateUser(w http.ResponseWriter, r *http.Request) {
-
-	user := getUserNameParamFromurl(r)
-	createuser(&user)
-	respCode := createUserResponseHandler(&user, http.StatusCreated)
-	userInJson := newjsonUser(user.UserName, user.Result, user.Code)
-	makeJsonResponse(w, userInJson, respCode)
-
 }
