@@ -44,6 +44,16 @@ func apiDeleteUser(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func apiUpdateUser(w http.ResponseWriter, r *http.Request) {
+
+	user := getUserNameParamFromUrl(r)
+	updateuser(&user)
+	respCode := createUserResponseHandler(&user, http.StatusCreated)
+	userInJson := newjsonUser(user.UserName, user.Result, user.Code)
+	makeJsonResponse(w, userInJson, respCode)
+
+}
+
 func getUserNameParamFromUrl(r *http.Request) userCode {
 	params := mux.Vars(r)
 	userName := params["username"]
