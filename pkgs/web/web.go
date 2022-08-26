@@ -13,6 +13,12 @@ import (
 	"github.com/Abbas-gheydi/radotp/pkgs/storage"
 )
 
+const (
+	user_has_otp_code string = "user has otp code"
+	user_not_found    string = "user not found"
+	already_exists    string = "already exists"
+)
+
 var ListenAddr = "0.0.0.0:8080"
 var QrIssuer = "radotp"
 
@@ -78,7 +84,7 @@ func createuser(user *userCode) {
 		user.Code = ""
 		user.Qr = ""
 		if strings.Contains(user.Err.Error(), "duplicate key value violates unique constraint \"otps_username_key\"") {
-			user.Err = fmt.Errorf("already exists")
+			user.Err = fmt.Errorf(already_exists)
 		}
 
 		log.Println("createuser", user.Err)
@@ -105,14 +111,14 @@ func searchuser(user *userCode) {
 	SearchResualt, getErr := storage.Get(user.UserName)
 	if SearchResualt == "" || getErr != nil {
 		log.Println("searchuser error", getErr)
-		user.Result = "user not found"
+		user.Result = user_not_found
 		if !strings.Contains(getErr.Error(), "record not found") {
 			user.Err = getErr
 
 		}
 
 	} else {
-		user.Result = "user has otp code"
+		user.Result = user_has_otp_code
 	}
 }
 

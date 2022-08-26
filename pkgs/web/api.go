@@ -62,13 +62,13 @@ func createUserResponseHandler(user *userCode, okResponseCode int) (respCode int
 		user.Result = "true"
 		respCode = okResponseCode
 
-	case "user has otp code":
+	case user_has_otp_code:
 		respCode = okResponseCode
 
-	case "user not found":
+	case user_not_found:
 		respCode = okResponseCode
 
-	case "already exists":
+	case already_exists:
 		respCode = http.StatusMethodNotAllowed
 
 	default:
