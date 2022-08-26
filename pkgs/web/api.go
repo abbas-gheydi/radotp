@@ -9,7 +9,7 @@ import (
 
 type JsonUSer struct {
 	UserName     string `json:"username"`
-	Status       string `json:"status"`
+	Result       string `json:"result"`
 	OtpCode      string `json:"otp_code,omitempty"`
 	ResponseCode int    `json:"-"`
 }
@@ -28,22 +28,53 @@ func makeJsonResponse(w http.ResponseWriter, juser JsonUSer, statusCode int) {
 }
 
 func newjsonUser(userName string, status string, otpCode string) JsonUSer {
-	return JsonUSer{UserName: userName, Status: status, OtpCode: otpCode}
+	return JsonUSer{UserName: userName, Result: status, OtpCode: otpCode}
 
+}
+
+func createUserResponseHandler(user *userCode, okResponseCode int) (respCode int) {
+	if user.Err != nil {
+		user.Result = user.Err.Error()
+	}
+	switch user.Result {
+
+	case "":
+		user.Result = "true"
+		respCode = okResponseCode
+
+	case "user has otp code":
+		respCode = okResponseCode
+
+	case "user not found":
+		respCode = okResponseCode
+
+	case "already exists":
+		respCode = http.StatusMethodNotAllowed
+
+	default:
+		user.Result = "false"
+		respCode = http.StatusInternalServerError
+
+	}
+	return
 }
 
 func apiGetUser(w http.ResponseWriter, r *http.Request) {
 
-	respCode := http.StatusOK
-
 	user := getUserNameParamFromurl(r)
 	searchuser(&user)
+	respCode := createUserResponseHandler(&user, http.StatusOK)
+	userInJson := newjsonUser(user.UserName, user.Result, user.Code)
+	makeJsonResponse(w, userInJson, respCode)
 
-	userInJson := newjsonUser(user.UserName, user.Result, user.Qr)
-	if user.Err != nil {
-		respCode = http.StatusInternalServerError
-	}
+}
 
+func apiCreateUser(w http.ResponseWriter, r *http.Request) {
+
+	user := getUserNameParamFromurl(r)
+	createuser(&user)
+	respCode := createUserResponseHandler(&user, http.StatusCreated)
+	userInJson := newjsonUser(user.UserName, user.Result, user.Code)
 	makeJsonResponse(w, userInJson, respCode)
 
 }

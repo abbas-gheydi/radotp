@@ -75,11 +75,13 @@ func createuser(user *userCode) {
 	user.Code, user.Qr = authentiate.NewOtpUser(user.UserName, QrIssuer)
 	user.Err = storage.Set(user.UserName, user.Code)
 	if user.Err != nil {
+		user.Code = ""
+		user.Qr = ""
 		if strings.Contains(user.Err.Error(), "duplicate key value violates unique constraint \"otps_username_key\"") {
-			user.Err = fmt.Errorf("already exists:")
+			user.Err = fmt.Errorf("already exists")
 		}
 
-		log.Println("errorr opts.err", user.Err)
+		log.Println("createuser", user.Err)
 	}
 }
 
