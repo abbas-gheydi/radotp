@@ -23,7 +23,7 @@ func StartRouter() {
 	router.Handle("/logs/", MustAuth(logs))
 	router.Handle("/header/", MustAuth(serverHeader))
 
-	router.HandleFunc("/api/v1/{username}", apiGetUser).Methods("GET")
+	router.Handle("/api/v1/{username}", restApiMustAuth(apiGetUser)).Methods(http.MethodGet)
 
 	log.Println("Web Interface Listen on:", ListenAddr)
 
