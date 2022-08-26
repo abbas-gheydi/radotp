@@ -14,44 +14,33 @@ type JsonUSer struct {
 	ResponseCode int    `json:"-"`
 }
 
-func apiGetUser(w http.ResponseWriter, r *http.Request) {
+type apiActions func(*userCode)
+
+func apiActionsfunc(w http.ResponseWriter, r *http.Request, action apiActions) {
 
 	user := getUserNameParamFromUrl(r)
-	searchuser(&user)
+	action(&user)
 	respCode := createUserResponseHandler(&user, http.StatusOK)
 	userInJson := newjsonUser(user.UserName, user.Result, user.Code)
 	makeJsonResponse(w, userInJson, respCode)
 
 }
 
-func apiCreateUser(w http.ResponseWriter, r *http.Request) {
+func apiGetUser(w http.ResponseWriter, r *http.Request) {
+	apiActionsfunc(w, r, searchuser)
+}
 
-	user := getUserNameParamFromUrl(r)
-	createuser(&user)
-	respCode := createUserResponseHandler(&user, http.StatusCreated)
-	userInJson := newjsonUser(user.UserName, user.Result, user.Code)
-	makeJsonResponse(w, userInJson, respCode)
+func apiCreateUser(w http.ResponseWriter, r *http.Request) {
+	apiActionsfunc(w, r, createuser)
 
 }
 
 func apiDeleteUser(w http.ResponseWriter, r *http.Request) {
-
-	user := getUserNameParamFromUrl(r)
-	deleteuser(&user)
-	respCode := createUserResponseHandler(&user, http.StatusCreated)
-	userInJson := newjsonUser(user.UserName, user.Result, user.Code)
-	makeJsonResponse(w, userInJson, respCode)
-
+	apiActionsfunc(w, r, deleteuser)
 }
 
 func apiUpdateUser(w http.ResponseWriter, r *http.Request) {
-
-	user := getUserNameParamFromUrl(r)
-	updateuser(&user)
-	respCode := createUserResponseHandler(&user, http.StatusCreated)
-	userInJson := newjsonUser(user.UserName, user.Result, user.Code)
-	makeJsonResponse(w, userInJson, respCode)
-
+	apiActionsfunc(w, r, updateuser)
 }
 
 func getUserNameParamFromUrl(r *http.Request) userCode {
