@@ -40,10 +40,12 @@ func (c *Configurations) Load() {
 type webconf struct {
 	Listen string
 	Isuuer string
+	Apikey string
 }
 type metrics struct {
 	EnablePrometheusExporter bool
 	Listen                   string
+	PromethuesAddress        string
 }
 type databaseconf struct {
 	Server,

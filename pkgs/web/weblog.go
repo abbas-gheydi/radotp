@@ -10,9 +10,9 @@ import (
 )
 
 var (
-	promethuesServerAddress string = "http://localhost:9090"
+	PromethuesServerAddress string = "http://localhost:9090"
 
-	promethuesURL string = promethuesServerAddress + "/api/v1/query?query="
+	//promethuesURL string = PromethuesServerAddress + "/api/v1/query?query="
 )
 
 type metric struct {
@@ -64,6 +64,7 @@ func (j queryResault) String() string {
 }
 
 func getRawData(url string) ([]byte, error) {
+	promethuesURL := PromethuesServerAddress + "/api/v1/query?query="
 	queryfqn := promethuesURL + url
 	resp, getErr := http.Get(queryfqn)
 	if getErr != nil {

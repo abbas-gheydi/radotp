@@ -36,6 +36,8 @@ func loadConfigs() {
 	//web configs
 	web.ListenAddr = cfg.Web.Listen
 	web.QrIssuer = cfg.Web.Isuuer
+	web.ApiKey = cfg.Web.Apikey
+	web.PromethuesServerAddress = cfg.Metrics.PromethuesAddress
 
 	//ldap configs
 	rad.Auth_Provider = cfg.Ldap

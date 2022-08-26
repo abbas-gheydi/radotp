@@ -1,14 +1,16 @@
 package web
 
 import (
+	"crypto/sha512"
+	"crypto/subtle"
 	"fmt"
 	"net/http"
 )
 
-func isRestReqAuthorized(w http.ResponseWriter, r *http.Request) bool {
-	//check for api key
-	return true
-}
+var (
+	bearerPrefix = "Bearer "
+	ApiKey       = ""
+)
 
 func restApiMustAuth(handler func(w http.ResponseWriter, r *http.Request)) *RestAuthHandler {
 
@@ -31,4 +33,17 @@ func (h *RestAuthHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	}
 
+}
+
+func secureCompare(apikey string, userkey string) bool {
+	givenSha := sha512.Sum512([]byte(apikey))
+	actualSha := sha512.Sum512([]byte(userkey))
+
+	return subtle.ConstantTimeCompare(givenSha[:], actualSha[:]) == 1
+}
+
+func isRestReqAuthorized(w http.ResponseWriter, r *http.Request) bool {
+	var bearerkey = bearerPrefix + ApiKey
+	userToken := r.Header.Get("Authorization")
+	return secureCompare(bearerkey, userToken) && ApiKey != ""
 }
