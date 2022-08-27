@@ -12,48 +12,54 @@
 <title>OTP SERVER</title>
 <link rel="stylesheet" type="text/css" href="/assets/css/header.css">
 
-
-
   </head>
+
   <body>
 
 <script id="add_navbar" src="/assets/js/header.js"></script>
 
-    
-
-
+<div class="container" >
 <form method="post">
   <div class="row">
+
     <div class="col">
-      <input type="text" class="form-control" placeholder="1h" name="timerange">
+    Time Range
+    <input type="text" class="form-control" placeholder="1h" name="timerange">
     </div>
+
     <div class="col">
-      <input type="text" class="form-control" placeholder="username" name="user">
+    User Name
+    <input type="text" class="form-control" placeholder="username" name="user">
     </div>
 
-
-
     <div class="col">
+    Stage
     <select class="form-control" name="stage">
       <option>.*</option>
       <option>otp</option>
       <option>active-directory</option>
 
     </select>
+
   </div>
 
+
     <div class="col">
+    State
     <select class="form-control" name="state">
       <option>.*</option>
       <option>accept</option>
       <option>challenge</option>
       <option>reject</option>
     </select>
+
     </div>
 
 
+
     <div class="col">
-      <button type="submit" class="btn btn-primary">search</button>
+    </br>
+    <button type="submit" class="btn btn-primary" name="submit">search</button>
 
     </div>
 
@@ -75,7 +81,7 @@
 
 </div>
 
-
+</div>
 
 
 </body>
