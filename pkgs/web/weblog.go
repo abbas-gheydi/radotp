@@ -70,7 +70,7 @@ func getRawData(url string) ([]byte, error) {
 	resp, getErr := http.Get(queryfqn)
 	if getErr != nil {
 		log.Println(getErr)
-		return nil, getErr
+		return nil, errors.New("prometheus connection error!")
 	}
 	body, readErr := ioutil.ReadAll(resp.Body)
 	if readErr != nil {
