@@ -2,6 +2,7 @@ package web
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -90,6 +91,10 @@ func getQuery(query string) (queryResault, error) {
 		log.Println(jsonError)
 		return queryResault{}, jsonError
 
+	}
+	if len(logs.Datas.Results) == 0 {
+
+		return queryResault{}, errors.New(" No Result\n you can increase Time Range\n e.g: 6h (6 houres)\n 1d (1 day)\n 1w (1 week)\n")
 	}
 	return logs, nil
 
