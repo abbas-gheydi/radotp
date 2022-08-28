@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -64,7 +65,7 @@ func (j queryResault) String() string {
 	out := ""
 	for rs := range j.Datas.Results {
 		for va := range j.Datas.Results[rs].Value {
-			out += fmt.Sprintf("%v user %v on %v stage %v RetryCount %v\n", j.Datas.Results[rs].Value[va].String().Vtime, j.Datas.Results[rs].Metrics.User, j.Datas.Results[rs].Metrics.Stage, j.Datas.Results[rs].Metrics.State, j.Datas.Results[rs].Value[va].String().HitCount)
+			out += fmt.Sprintf("%v    user: %v    stage: %v    %v    count: %v\n", j.Datas.Results[rs].Value[va].String().Vtime, j.Datas.Results[rs].Metrics.User, j.Datas.Results[rs].Metrics.Stage, strings.ToLower(j.Datas.Results[rs].Metrics.State), j.Datas.Results[rs].Value[va].String().HitCount)
 
 		}
 	}
