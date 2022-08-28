@@ -121,7 +121,7 @@ func logs(w http.ResponseWriter, r *http.Request) {
 		q.State = r.FormValue("state")
 		q.User = r.FormValue("user")
 		q.TimeRange = r.FormValue("timerange")
-		log.Println(q)
+		//log.Println(q)
 
 		qResulat, qErr := getQuery(queryMakert(q))
 		if qErr != nil {
