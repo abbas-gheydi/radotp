@@ -25,20 +25,27 @@ type metric struct {
 
 type values []interface {
 }
+type metricValue struct {
+	HitCount string
+	Vtime    string
+}
 
-func (v values) String() string {
-	out := ""
+func (v values) String() (mValue metricValue) {
+
 	for _, i := range v {
 		switch items := i.(type) {
 		case float64:
 			timeT := time.Unix(int64(items), 0)
 
-			out = fmt.Sprint(timeT)
+			mValue.Vtime = fmt.Sprint(timeT)
+		case string:
+			mValue.HitCount = items
 
 		}
+
 	}
 
-	return out
+	return
 }
 
 type result struct {
@@ -57,7 +64,7 @@ func (j queryResault) String() string {
 	out := ""
 	for rs := range j.Datas.Results {
 		for va := range j.Datas.Results[rs].Value {
-			out += fmt.Sprintf("%v user %v on %v stage, %v\n", j.Datas.Results[rs].Value[va], j.Datas.Results[rs].Metrics.User, j.Datas.Results[rs].Metrics.Stage, j.Datas.Results[rs].Metrics.State)
+			out += fmt.Sprintf("%v user %v on %v stage %v RetryCount %v\n", j.Datas.Results[rs].Value[va].String().Vtime, j.Datas.Results[rs].Metrics.User, j.Datas.Results[rs].Metrics.Stage, j.Datas.Results[rs].Metrics.State, j.Datas.Results[rs].Value[va].String().HitCount)
 
 		}
 	}
