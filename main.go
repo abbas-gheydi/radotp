@@ -38,6 +38,7 @@ func loadConfigs() {
 	web.QrIssuer = cfg.Web.Isuuer
 	web.ApiKey = cfg.Web.Apikey
 	web.PromethuesServerAddress = cfg.Metrics.PromethuesAddress
+	web.EnableRestApi = cfg.Web.EnableRestApi
 
 	//ldap configs
 	rad.Auth_Provider = cfg.Ldap

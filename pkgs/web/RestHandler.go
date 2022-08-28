@@ -8,8 +8,9 @@ import (
 )
 
 var (
-	bearerPrefix = "Bearer "
-	ApiKey       = ""
+	bearerPrefix  = "Bearer "
+	ApiKey        = ""
+	EnableRestApi bool
 )
 
 func restApiMustAuth(handler func(w http.ResponseWriter, r *http.Request)) *RestAuthHandler {
@@ -45,5 +46,5 @@ func secureCompare(apikey string, userkey string) bool {
 func isRestReqAuthorized(w http.ResponseWriter, r *http.Request) bool {
 	var bearerkey = bearerPrefix + ApiKey
 	userToken := r.Header.Get("Authorization")
-	return secureCompare(bearerkey, userToken) && ApiKey != ""
+	return secureCompare(bearerkey, userToken) && ApiKey != "" && EnableRestApi
 }

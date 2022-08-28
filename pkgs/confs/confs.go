@@ -38,9 +38,10 @@ func (c *Configurations) Load() {
 }
 
 type webconf struct {
-	Listen string
-	Isuuer string
-	Apikey string
+	Listen        string
+	Isuuer        string
+	Apikey        string
+	EnableRestApi bool
 }
 type metrics struct {
 	EnablePrometheusExporter bool
