@@ -2,7 +2,7 @@ package rad
 
 import (
 	"log"
-	"regexp"
+	"unicode"
 
 	"github.com/Abbas-gheydi/radotp/pkgs/authentiate"
 
@@ -43,7 +43,7 @@ func otpHandler(w radius.ResponseWriter, r *radius.Request) {
 func IsOtpCodeValied(username string, password string) bool {
 
 	//otp password must be only numbers
-	if !isSafeInput(password) {
+	if !IsOtpCodeSafe(password) {
 		return false
 	}
 
@@ -60,8 +60,22 @@ func IsOtpCodeValied(username string, password string) bool {
 
 }
 
+func IsOtpCodeSafe(input string) bool {
+	if len([]rune(input)) != 6 {
+		return false
+	}
+	for _, digit := range input {
+		if !unicode.IsDigit(digit) {
+			return false
+		}
+	}
+	return true
+}
 func isSafeInput(input string) bool {
-	var reg = regexp.MustCompile(`^[0-9A-Za-z_.@]{1,30}$`)
-	return reg.MatchString(input)
+	/*
+		var reg = regexp.MustCompile(`^[0-9A-Za-z_.@]{1,30}$`)
+		return reg.MatchString(input)
+	*/
+	return true
 
 }
