@@ -59,9 +59,9 @@ type databaseconf struct {
 }
 
 type LdapProvider struct {
-	Groups     []string
-	LdapServer []string
-	Basedn     string
-	Port       int
-	Security   int
+	Groups      []string
+	LdapServers []string
+	Basedn      string
+	Port        int
+	Security    int
 }
