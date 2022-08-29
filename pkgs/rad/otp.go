@@ -2,7 +2,6 @@ package rad
 
 import (
 	"log"
-	"unicode"
 
 	"github.com/Abbas-gheydi/radotp/pkgs/authentiate"
 
@@ -57,25 +56,5 @@ func IsOtpCodeValied(username string, password string) bool {
 	} else {
 		return false
 	}
-
-}
-
-func IsOtpCodeSafe(input string) bool {
-	if len([]rune(input)) != 6 {
-		return false
-	}
-	for _, digit := range input {
-		if !unicode.IsDigit(digit) {
-			return false
-		}
-	}
-	return true
-}
-func isSafeInput(input string) bool {
-	/*
-		var reg = regexp.MustCompile(`^[0-9A-Za-z_.@]{1,30}$`)
-		return reg.MatchString(input)
-	*/
-	return true
 
 }
