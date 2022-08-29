@@ -8,6 +8,7 @@ import (
 	"github.com/Abbas-gheydi/radotp/pkgs/rad"
 	"github.com/Abbas-gheydi/radotp/pkgs/storage"
 	"github.com/Abbas-gheydi/radotp/pkgs/web"
+	ldapAuth "github.com/korylprince/go-ad-auth/v3"
 )
 
 var cfg confs.Configurations
@@ -41,7 +42,14 @@ func loadConfigs() {
 	web.EnableRestApi = cfg.Web.EnableRestApi
 
 	//ldap configs
-	rad.Auth_Provider = cfg.Ldap
+	//rad.Auth_Provider = cfg.Ldap
+	rad.Auth_Provider.Groups = cfg.Ldap.Groups
+	rad.Auth_Provider.LdapConfig = &ldapAuth.Config{}
+	rad.Auth_Provider.LdapConfig.BaseDN = cfg.Ldap.Basedn
+	rad.Auth_Provider.LdapConfig.Port = cfg.Ldap.Port
+	rad.Auth_Provider.LdapConfig.Security = ldapAuth.SecurityType(cfg.Ldap.Security)
+	rad.Auth_Provider.LdapConfig.Server = cfg.Ldap.LdapServer[0]
+	rad.Auth_Provider.LdapServers = cfg.Ldap.LdapServer
 
 	//database configs
 	storage.Dsn = fmt.Sprintf("host=%v user=%v password=%v dbname=%v port=%v sslmode=%v TimeZone=%v", cfg.Database.Server, cfg.Database.Username, cfg.Database.Password, cfg.Database.Dbname, cfg.Database.Port, cfg.Database.Sslmode, cfg.Database.Timezone)

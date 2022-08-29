@@ -8,13 +8,31 @@ import (
 )
 
 type LdapProvider struct {
-	LdapConfig ldapAuth.Config
-	Groups     []string
+	LdapConfig  *ldapAuth.Config
+	Groups      []string
+	LdapServers []string
+}
+
+func (l LdapProvider) changeLapSegver() {
+	if len(l.LdapServers) > 1 {
+
+		for _, srv := range l.LdapServers {
+			if srv == l.LdapConfig.Server {
+				continue
+			}
+			l.LdapConfig.Server = srv
+			log.Println("change ldap server to ", srv)
+			break
+
+		}
+
+	}
+
 }
 
 func (l LdapProvider) IsUserAuthenticated(username string, password string) (authStat bool, groups []string) {
-
-	authStat, _, groups, err := ldapAuth.AuthenticateExtended(&l.LdapConfig, username, password, []string{"cn"}, l.Groups)
+	//log.Println("ldap server address", l.LdapConfig.Server)
+	authStat, _, groups, err := ldapAuth.AuthenticateExtended(l.LdapConfig, username, password, []string{"cn"}, l.Groups)
 	//log.Printf("status %v entry %v groups %v", authStat, entry, groups)
 
 	if err != nil {
@@ -24,7 +42,11 @@ func (l LdapProvider) IsUserAuthenticated(username string, password string) (aut
 		if strings.Contains(err.Error(), "Search error") {
 
 			l.Groups = nil
-			authStat, _, groups, _ = ldapAuth.AuthenticateExtended(&l.LdapConfig, username, password, []string{"cn"}, l.Groups)
+			authStat, _, groups, _ = ldapAuth.AuthenticateExtended(l.LdapConfig, username, password, []string{"cn"}, l.Groups)
+		}
+		//try another ldap server
+		if strings.Contains(err.Error(), "Connection error") {
+			l.changeLapSegver()
 		}
 
 		return

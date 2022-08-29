@@ -13,7 +13,6 @@ import (
 var Auth_Provider authentiate.LdapProvider
 
 const (
-	//label_otp_stage  = "otp"
 	label_ldap_stage = "active directory"
 )
 

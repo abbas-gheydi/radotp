@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/Abbas-gheydi/radotp/pkgs/authentiate"
 	"github.com/Abbas-gheydi/radotp/pkgs/rad"
 
 	"github.com/spf13/viper"
@@ -13,7 +12,7 @@ import (
 type Configurations struct {
 	Web      webconf
 	Database databaseconf
-	Ldap     authentiate.LdapProvider
+	Ldap     LdapProvider
 	Radius   rad.RadConfs
 	Metrics  metrics
 }
@@ -57,4 +56,12 @@ type databaseconf struct {
 	Connection_max,
 	Sslmode,
 	Timezone string
+}
+
+type LdapProvider struct {
+	Groups     []string
+	LdapServer []string
+	Basedn     string
+	Port       int
+	Security   int
 }
