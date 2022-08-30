@@ -68,7 +68,7 @@ func createUserResponseHandler(user *userCode, okResponseCode int) (respCode int
 	switch user.Result {
 
 	case "":
-		user.Result = "true"
+		user.Result = "ok"
 		respCode = okResponseCode
 
 	case user_has_otp_code:

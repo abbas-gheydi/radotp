@@ -1,0 +1,86 @@
+---
+openapi: 3.0.1
+info:
+  title: OTP Server API
+  description: an api to create/edit/delete/get user
+  version: "1"
+servers:
+- url: http://127.0.0.1:8080
+paths:
+  /api/v1/UserName:
+    get:
+      description: Check "UserName" has otp code already.
+      responses:
+        "200":
+          description: Auto generated using Swagger Inspector
+          content:
+            application/json:
+              examples:
+                example:
+                  value:
+                    username: NewUserName
+                    result: user has otp code
+      security:
+      - bearerAuth: []
+      servers:
+      - url: http://127.0.0.1:8080
+    put:
+      description: generate otp code for "UserName"
+      responses:
+        "201":
+          description: Auto generated using Swagger Inspector
+          content:
+            application/json:
+              examples:
+                example:
+                  value:
+                    username: NewUserName
+                    result: ok
+                    otp_code: L6KHZEDJTZMY32AF2K2SL646W6
+      security:
+      - bearerAuth: []
+      servers:
+      - url: http://127.0.0.1:8080
+    post:
+      description: force update "UserName" otp code
+      responses:
+        "201":
+          description: Auto generated using Swagger Inspector
+          content:
+            application/json:
+              examples:
+                example:
+                  value:
+                    username: NewUserName
+                    result: ok
+                    otp_code: XCEGJSHEQPUXHIUCQXW5WRXAMY
+      security:
+      - bearerAuth: []
+      servers:
+      - url: http://127.0.0.1:8080
+    delete:
+      description: remove otp code access for "UserName"
+      responses:
+        "200":
+          description: Auto generated using Swagger Inspector
+          content:
+            application/json:
+              examples:
+                example:
+                  value:
+                    username: NewUserName
+                    result: Disabled OTP Code for User
+      security:
+      - bearerAuth: []
+      servers:
+      - url: http://127.0.0.1:8080
+    servers:
+    - url: http://127.0.0.1:8080
+components:
+  schemas: {}
+  securitySchemes:
+    bearerAuth:
+      type: http
+      description: JWT Authorization header using the Bearer scheme.
+      scheme: bearer
+      bearerFormat: JWT
