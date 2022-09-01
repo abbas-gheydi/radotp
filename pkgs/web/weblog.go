@@ -109,6 +109,7 @@ func getQuery(query string) (queryResault, error) {
 }
 
 func queryMakert(q metric) string {
+	log.Println(q)
 
 	if q.TimeRange == "" {
 		q.TimeRange = "1h"
@@ -116,7 +117,14 @@ func queryMakert(q metric) string {
 	if q.User == "" {
 		q.User = ".*"
 	}
-	return fmt.Sprintf(`radius_response{stage=~"%s",state=~"%s",user=~"%s"}[%s]`, q.Stage, q.State, q.User, q.TimeRange)
+	if q.Stage == "" {
+		q.Stage = ".*"
+	}
+	if q.State == "" {
+		q.State = ".*"
+	}
+	query := fmt.Sprintf(`radius_response{stage=~"%s",state=~"%s",user=~"%s"}[%s]`, q.Stage, q.State, q.User, q.TimeRange)
+	return strings.ReplaceAll(query, " ", "%20")
 }
 
 func logs(w http.ResponseWriter, r *http.Request) {
