@@ -11,9 +11,9 @@
       }
     ],
     "paths": {
-      "/api/v1/{UserName}": {
+      "/api/v1/user/{UserName}": {
         "get": {
-          "description": "Check \"UserName\" has otp code already.",
+          "description": "Check \"UserName\" has otp secret already.",
           "parameters": [
             {
               "name": "UserName",
@@ -52,7 +52,7 @@
           ]
         },
         "put": {
-          "description": "generate otp code for \"UserName\"",
+          "description": "generate otp secret for \"UserName\"",
           "parameters": [
             {
               "name": "UserName",
@@ -72,7 +72,7 @@
                       "value": {
                         "username": "NewUserName",
                         "result": "ok",
-                        "otp_code": "L6KHZEDJTZMY32AF2K2SL646W6"
+                        "secret": "L6KHZEDJTZMY32AF2K2SL646W6"
                       }
                     }
                   }
@@ -92,7 +92,7 @@
           ]
         },
         "post": {
-          "description": "force update \"UserName\" otp code",
+          "description": "force update \"UserName\" otp secret",
           "parameters": [
             {
               "name": "UserName",
@@ -104,7 +104,7 @@
           ],
           "responses": {
             "201": {
-              "description": "otp code for UserName has been changed",
+              "description": "otp secret for UserName has been changed",
               "content": {
                 "application/json": {
                   "examples": {
@@ -112,7 +112,7 @@
                       "value": {
                         "username": "UserName",
                         "result": "ok",
-                        "otp_code": "XCEGJSHEQPUXHIUCQXW5WRXAMY"
+                        "secret": "XCEGJSHEQPUXHIUCQXW5WRXAMY"
                       }
                     }
                   }
@@ -132,7 +132,7 @@
           ]
         },
         "delete": {
-          "description": "remove otp code access for \"UserName\"",
+          "description": "remove otp access for \"UserName\"",
           "parameters": [
             {
               "name": "UserName",
@@ -144,7 +144,7 @@
           ],
           "responses": {
             "200": {
-              "description": "UerName otp code for user has been disabled",
+              "description": "UerName otp secret for user has been disabled",
               "content": {
                 "application/json": {
                   "examples": {

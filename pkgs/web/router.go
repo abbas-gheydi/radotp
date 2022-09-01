@@ -27,10 +27,10 @@ func StartRouter() {
 	router.Handle("/logs/", MustAuth(logs))
 	router.Handle("/header/", MustAuth(serverHeader))
 
-	router.Handle("/api/v1/{username}", restApiMustAuth(apiGetUser)).Methods(http.MethodGet)
-	router.Handle("/api/v1/{username}", restApiMustAuth(apiCreateUser)).Methods(http.MethodPut)
-	router.Handle("/api/v1/{username}", restApiMustAuth(apiDeleteUser)).Methods(http.MethodDelete)
-	router.Handle("/api/v1/{username}", restApiMustAuth(apiUpdateUser)).Methods(http.MethodPost)
+	router.Handle("/api/v1/user/{username}", restApiMustAuth(apiGetUser)).Methods(http.MethodGet)
+	router.Handle("/api/v1/user/{username}", restApiMustAuth(apiCreateUser)).Methods(http.MethodPut)
+	router.Handle("/api/v1/user/{username}", restApiMustAuth(apiDeleteUser)).Methods(http.MethodDelete)
+	router.Handle("/api/v1/user/{username}", restApiMustAuth(apiUpdateUser)).Methods(http.MethodPost)
 
 	log.Println("Web Interface Listen on:", ListenAddr)
 

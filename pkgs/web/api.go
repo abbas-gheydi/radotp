@@ -10,7 +10,7 @@ import (
 type JsonUSer struct {
 	UserName     string `json:"username"`
 	Result       string `json:"result"`
-	OtpCode      string `json:"otp_code,omitempty"`
+	OtpCode      string `json:"secret,omitempty"`
 	ResponseCode int    `json:"-"`
 }
 
