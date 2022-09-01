@@ -2,7 +2,7 @@
 
 body, html {
   font-family: 'Source Sans Pro', sans-serif;
-  background-color: #748ffc;
+  background-color: #ecf0f3;
   padding: 0;
   margin: 0;
 }
@@ -22,11 +22,11 @@ body, html {
   transform: translateX(-50%);
   background-color: rgb( 33, 41, 66 );
   border-radius: 9px;
-  border-top: 10px solid #bac8ff;
-  border-bottom: 10px solid #bac8ff;
+  border-top: 10px solid #aeafaf;
+  border-bottom: 10px solid #aeafaf;
   width: 400px;
   height: 500px;
-  box-shadow: 1px 1px 50.8px 19.2px #5c7cfa;
+  box-shadow: 1px 1px 50.8px 19.2px #9c9e9e;
 }
 .box {
     margin-top: 80px;
@@ -39,19 +39,7 @@ body, html {
   margin-top:94px;;
 }
 
-/* .box h4 span {
-  color: #dfdeee;
-  font-weight: lighter;
-}
 
-.box h5 {
-  font-family: 'Source Sans Pro', sans-serif;
-  font-size: 13px;
-  color: #a1a4ad;
-  letter-spacing: 1.5px;
-  margin-top: -15px;
-  margin-bottom: 70px;
-} */
 
 .box input[type = "text"],.box input[type = "password"] {
   display: block;

@@ -48,7 +48,7 @@
     display: block;
     transition: 0.2s;
     font-size: 1rem;
-    color: #ffff;
+    color: rgb(58, 42, 42);
     font-weight: 700;
   }
   
@@ -66,7 +66,7 @@
     align-items: center;
     min-height: 100vh;
     font-size: 1.5rem;
-    background-color: #a2b0e9;
+    background-color: #ecf0f3;
   }
 
 
@@ -74,9 +74,9 @@
 
   :root {
     --gray: #636e72;
-    --dark-gray: #9ecfddf3;
+    --dark-gray: #ecf0f3;
     --light-gray: #2e3b40;
-    --x-light-gray: #dfe6e9;
+    --x-light-gray: #777671;
     --gradient: linear-gradient(#0d50b6, #7fb3ef);
   }
   

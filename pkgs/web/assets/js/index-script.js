@@ -8,7 +8,7 @@ btn.onclick = () => {
 
     if (uname == "")
 {
-alert("Please enter a user name");
+alert("Please enter a username");
 } else if(task == "") {
     alert("action not defined")
 } else {
