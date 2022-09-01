@@ -18,7 +18,7 @@
 <form method="POST" id="usersform">
     <div class="form__group field">
         <input type="input" class="form__field" id="username" placeholder="UserName" name="username" required />
-         <label for="username" class="form__label">UserName</label> 
+         <label for="username" class="form__label">Username</label> 
     </div>
 
 
@@ -48,8 +48,8 @@
 </br>
    
 
+
 {{if and (.Code) (not .Err)}}
-OTP code for {{.UserName}} is: {{.Code}}
 
 <!-- qr code -->
 
@@ -67,27 +67,38 @@ var qrcode = new QRCode(document.getElementById("qrcode"), {
 </script>
 
 
+</br>
+<div class="container">
+<p style="font-size:20px">
+Username: {{.UserName}}</br>
+OTP secret seed: {{.Code}}
+</p>
 
+{{end}}
 <!-- qr code -->
 
 
 
-
-{{end}}
-
-
 {{if .Err}}
-{{.Err}} {{ .UserName}}
+<div class="container">
+<p style="font-size:20px">
+Username {{ .UserName}} {{.Err}} 
+</p>
 {{end}}
+
 
 
 {{if .Result}}
-{{.Result}}
+<div class="container">
+<p style="font-size:20px">
+{{.Result}} Username: {{ .UserName}} 
+</p>
 {{end}}
 
 
 
 
+</div>
 
 <br>
 <script src="/assets/js/index-script.js"></script>  
