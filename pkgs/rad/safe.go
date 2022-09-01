@@ -1,11 +1,12 @@
 package rad
 
 import (
+	"log"
 	"regexp"
 	"unicode"
 )
 
-var usernameRegexp = regexp.MustCompile(`^[0-9A-Za-z_.@]{1,30}$`)
+var usernameRegexp = regexp.MustCompile(`^[0-9A-Za-z_.@\-]{1,30}$`)
 
 func IsOtpCodeSafe(input string) bool {
 	if len([]rune(input)) != 6 {
@@ -21,6 +22,10 @@ func IsOtpCodeSafe(input string) bool {
 
 func isSafeInput(input string) bool {
 
-	return usernameRegexp.MatchString(input)
+	safe := usernameRegexp.MatchString(input)
+	if !safe {
+		log.Println("unexpected input string", input)
+	}
+	return safe
 
 }
