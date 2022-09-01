@@ -102,14 +102,13 @@ func getQuery(query string) (queryResault, error) {
 	}
 	if len(logs.Datas.Results) == 0 {
 
-		return queryResault{}, errors.New(" No Result\n you can increase Time Range\n e.g: 6h (6 houres)\n 1d (1 day)\n 1w (1 week)\n")
+		return queryResault{}, errors.New(" No Result\n you can increase Time Range\n e.g: 30m (30 minutes)\n 6h (6 houres)\n 1d (1 day)\n")
 	}
 	return logs, nil
 
 }
 
 func queryMakert(q metric) string {
-	log.Println(q)
 
 	if q.TimeRange == "" {
 		q.TimeRange = "1h"
