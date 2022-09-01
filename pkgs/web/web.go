@@ -29,6 +29,9 @@ var templates embed.FS
 //go:embed assets
 var assets embed.FS
 
+//go:embed swager
+var swager embed.FS
+
 type userCode struct {
 	UserName string
 	Code     string

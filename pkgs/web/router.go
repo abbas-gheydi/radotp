@@ -15,6 +15,10 @@ func StartRouter() {
 	//http.Handle("/assets/", http.FileServer(http.FS(assets)))
 	fs := http.FileServer(http.FS(assets))
 	router.PathPrefix("/assets/").Handler(serveAssets(fs))
+
+	swgr := http.FileServer(http.FS(swager))
+	router.PathPrefix("/swager").Handler(swgr)
+
 	router.HandleFunc("/login/", login)
 	router.HandleFunc("/sign_out/", signOut)
 

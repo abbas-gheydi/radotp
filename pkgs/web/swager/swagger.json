@@ -1,0 +1,192 @@
+{
+    "openapi": "3.0.1",
+    "info": {
+      "title": "OTP Server API",
+      "description": "an api to create/edit/delete/get user",
+      "version": "0.1"
+    },
+    "servers": [
+      {
+        "url": "/"
+      }
+    ],
+    "paths": {
+      "/api/v1/{UserName}": {
+        "get": {
+          "description": "Check \"UserName\" has otp code already.",
+          "parameters": [
+            {
+              "name": "UserName",
+              "in": "path",
+              "description": "The name that needs to be fetched. Use user1 for testing. ",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "user has otp code",
+              "content": {
+                "application/json": {
+                  "examples": {
+                    "example": {
+                      "value": {
+                        "username": "UserName",
+                        "result": "user has otp code"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "servers": [
+            {
+              "url": "/"
+            }
+          ]
+        },
+        "put": {
+          "description": "generate otp code for \"UserName\"",
+          "parameters": [
+            {
+              "name": "UserName",
+              "in": "path",
+              "description": "The name that needs to be fetched. Use user1 for testing. ",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "NewUserName has been created",
+              "content": {
+                "application/json": {
+                  "examples": {
+                    "example": {
+                      "value": {
+                        "username": "NewUserName",
+                        "result": "ok",
+                        "otp_code": "L6KHZEDJTZMY32AF2K2SL646W6"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "servers": [
+            {
+              "url": "/"
+            }
+          ]
+        },
+        "post": {
+          "description": "force update \"UserName\" otp code",
+          "parameters": [
+            {
+              "name": "UserName",
+              "in": "path",
+              "description": "The name that needs to be fetched. Use user1 for testing. ",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "otp code for UserName has been changed",
+              "content": {
+                "application/json": {
+                  "examples": {
+                    "example": {
+                      "value": {
+                        "username": "UserName",
+                        "result": "ok",
+                        "otp_code": "XCEGJSHEQPUXHIUCQXW5WRXAMY"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "servers": [
+            {
+              "url": "/"
+            }
+          ]
+        },
+        "delete": {
+          "description": "remove otp code access for \"UserName\"",
+          "parameters": [
+            {
+              "name": "UserName",
+              "in": "path",
+              "description": "The name that needs to be fetched. Use user1 for testing. ",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "UerName otp code for user has been disabled",
+              "content": {
+                "application/json": {
+                  "examples": {
+                    "example": {
+                      "value": {
+                        "username": "UserName",
+                        "result": "Disabled OTP Code for User"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "servers": [
+            {
+              "url": "/"
+            }
+          ]
+        },
+        "servers": [
+          {
+            "url": "/"
+          }
+        ]
+      }
+    },
+    "components": {
+      "schemas": {},
+      "securitySchemes": {
+        "bearerAuth": {
+          "type": "http",
+          "description": "JWT Authorization header using the Bearer scheme.",
+          "scheme": "bearer",
+          "bearerFormat": "JWT"
+        }
+      }
+    }
+  }
+  
