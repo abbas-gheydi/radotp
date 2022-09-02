@@ -28,7 +28,7 @@ _/    _/  _/    _/  _/_/_/      _/_/        _/      _/
 func main() {
 	confs.LoadConfigs()
 
-	art()
+	//art()
 
 	//database configuraion
 	storage.Initialize()
