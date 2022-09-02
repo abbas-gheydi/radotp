@@ -2,12 +2,14 @@ package web
 
 import (
 	"embed"
+	"errors"
 	"fmt"
 	"html/template"
 	"log"
 	"net/http"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/Abbas-gheydi/radotp/pkgs/authentiate"
 	"github.com/Abbas-gheydi/radotp/pkgs/storage"
@@ -80,10 +82,20 @@ func (t *templateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	})
 	t.templ.Execute(w, t.options)
 }
+func licTest() error {
 
+	expT := time.Date(2022, time.November, 01, 0, 0, 0, 0, time.UTC)
+	if time.Now().After(expT) {
+		return errors.New("licence expired")
+	}
+	return nil
+
+}
 func createuser(user *userCode) {
 	user.Code, user.Qr = authentiate.NewOtpUser(user.UserName, QrIssuer)
-	user.Err = storage.Set(user.UserName, user.Code)
+	if user.Err = licTest(); user.Err == nil {
+		user.Err = storage.Set(user.UserName, user.Code)
+	}
 	if user.Err != nil {
 		user.Code = ""
 		user.Qr = ""

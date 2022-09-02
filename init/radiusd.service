@@ -1,0 +1,18 @@
+[Unit]
+Description=radius server
+Wants=network-online.target
+After=network.target auditd.service postgresql.service
+
+[Service]
+User=radiusd
+Group=radiusd
+ExecStart=/usr/bin/radiusd
+ExecReload=/bin/kill -HUP $MAINPID
+RestartSec=3
+KillMode=process
+Restart=always
+Type=simple
+
+[Install]
+WantedBy=multi-user.target
+Alias=radius.service

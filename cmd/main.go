@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/Abbas-gheydi/radotp/pkgs/confs"
 	"github.com/Abbas-gheydi/radotp/pkgs/monitoring"
 	"github.com/Abbas-gheydi/radotp/pkgs/rad"
@@ -10,25 +8,9 @@ import (
 	"github.com/Abbas-gheydi/radotp/pkgs/web"
 )
 
-func art() {
-
-	fmt.Print(`	 
-                                                                  
-    _/_/_/      _/_/    _/_/_/      _/_/    _/_/_/_/_/  _/_/_/    
-   _/    _/  _/    _/  _/    _/  _/    _/      _/      _/    _/   
-  _/_/_/    _/_/_/_/  _/    _/  _/    _/      _/      _/_/_/      
- _/    _/  _/    _/  _/    _/  _/    _/      _/      _/           
-_/    _/  _/    _/  _/_/_/      _/_/        _/      _/            
-                                                                  
-                                                                  
-                                                              
-`)
-}
-
 func main() {
-	confs.LoadConfigs()
 
-	//art()
+	confs.LoadConfigs()
 
 	//database configuraion
 	storage.Initialize()
