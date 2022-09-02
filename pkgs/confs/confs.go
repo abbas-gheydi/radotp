@@ -21,8 +21,9 @@ func (c *Configurations) Load() {
 
 	viper.SetConfigType("toml")
 
-	viper.SetConfigName("radotp.conf")
+	viper.SetConfigName("radiusd.conf")
 	viper.SetConfigType("toml")
+	viper.AddConfigPath("/etc/motp/")
 	viper.AddConfigPath("/etc/radotp/")
 	viper.AddConfigPath(".")
 	err := viper.ReadInConfig()

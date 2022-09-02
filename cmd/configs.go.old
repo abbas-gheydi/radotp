@@ -3,30 +3,14 @@ package main
 import (
 	"fmt"
 
-	"github.com/Abbas-gheydi/radotp/pkgs/confs"
 	"github.com/Abbas-gheydi/radotp/pkgs/monitoring"
 	"github.com/Abbas-gheydi/radotp/pkgs/rad"
 	"github.com/Abbas-gheydi/radotp/pkgs/storage"
 	"github.com/Abbas-gheydi/radotp/pkgs/web"
 	ldapAuth "github.com/korylprince/go-ad-auth/v3"
 )
-
 var cfg confs.Configurations
 
-func art() {
-
-	fmt.Print(`	 
-                                                                  
-    _/_/_/      _/_/    _/_/_/      _/_/    _/_/_/_/_/  _/_/_/    
-   _/    _/  _/    _/  _/    _/  _/    _/      _/      _/    _/   
-  _/_/_/    _/_/_/_/  _/    _/  _/    _/      _/      _/_/_/      
- _/    _/  _/    _/  _/    _/  _/    _/      _/      _/           
-_/    _/  _/    _/  _/_/_/      _/_/        _/      _/            
-                                                                  
-                                                                  
-                                                              
-`)
-}
 func loadConfigs() {
 	//load configs from file
 	cfg.Load()
@@ -56,22 +40,4 @@ func loadConfigs() {
 	//monitoring
 	monitoring.Listen = cfg.Metrics.Listen
 	rad.EnableMetrics = cfg.Metrics.EnablePrometheusExporter
-}
-
-func main() {
-	loadConfigs()
-
-	art()
-
-	//database configuraion
-	storage.Initialize()
-
-	if cfg.Metrics.EnablePrometheusExporter {
-		go monitoring.Start()
-	}
-
-	go web.StartRouter()
-
-	rad.StartRadius()
-
 }
