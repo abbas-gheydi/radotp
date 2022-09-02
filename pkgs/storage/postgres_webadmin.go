@@ -18,6 +18,7 @@ type postgresWebAdmin struct{}
 
 type webadmin struct {
 	Uname    string
+	Role     string
 	Password string
 }
 
@@ -31,7 +32,6 @@ func (p postgresWebAdmin) GetAdminPassword(uname string) (password string) {
 
 func (p postgresWebAdmin) SetAdminPassword(password string) {
 	hash_password := ShaGenerator(password)
-
 	tx := db_web.Model(&webadmin{}).Where("uname = ?", "admin").Update("password", hash_password)
 	if tx.Error != nil {
 		log.Println("*****db.go", tx.Error)
@@ -41,8 +41,9 @@ func (p postgresWebAdmin) SetAdminPassword(password string) {
 	if tx.RowsAffected != 1 {
 		//create admin user with default password
 		tx.AddError(errors.New("user not found "))
+		db_web.Create(&webadmin{Uname: "admin", Role: "admin", Password: hash_password})
 		log.Print(" create admin/admin username for web access")
-		db_web.Create(&webadmin{Uname: "admin", Password: hash_password})
+
 	}
 
 }
