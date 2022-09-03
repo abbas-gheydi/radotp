@@ -1,8 +1,6 @@
 package rad
 
 import (
-	"log"
-
 	"github.com/Abbas-gheydi/radotp/pkgs/monitoring"
 	"github.com/Abbas-gheydi/radotp/pkgs/rad/vendors"
 
@@ -43,10 +41,11 @@ func RejectUser(w radius.ResponseWriter, r *radius.Request, stage string) (code 
 func SendForChalenge(w radius.ResponseWriter, r *radius.Request, stage string) (code radius.Code) {
 	paket := r.Packet.Response(radius.CodeAccessChallenge)
 	username := rfc2865.UserName_GetString(r.Packet)
-	stateInOurPool, groupInOurpoll := inMemoryPool.Lookup(username)
+	stateInOurPool, _ := inMemoryPool.Lookup(username)
+	//stateInOurPool, groupInOurpoll := inMemoryPool.Lookup(username)
 
 	//pool.Insert(username)
-	log.Println(username, " state ", stateInOurPool, " user groups is ", groupInOurpoll)
+	//log.Println(username, " state ", stateInOurPool, " user groups is ", groupInOurpoll)
 
 	rfc2865.State_SetString(paket, stateInOurPool)
 	rfc2865.ReplyMessage_Set(paket, []byte("ENTER OTP CODE"))
