@@ -53,7 +53,9 @@ func (s *Statepool) Init() {
 }
 
 func (s *Statepool) Delete(username string) {
+	statePoolMutex.Lock()
 	delete(s.userAttr, username)
+	statePoolMutex.Unlock()
 }
 
 func isStateValied(stateInPacket string, stateInOurPool string) bool {
