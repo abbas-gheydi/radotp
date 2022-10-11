@@ -34,7 +34,7 @@ func IsOtpCodeCurrect(username string, otpcode string) bool {
 	if user.err != nil {
 		return false
 	}
-	return user.OtpUser.Verify(otpcode, int(time.Now().Unix()))
+	return user.OtpUser.Verify(otpcode, int64(time.Now().Unix()))
 
 }
 func NewOtpUser(username string, issuerName string) (secret string, qrcode string) {

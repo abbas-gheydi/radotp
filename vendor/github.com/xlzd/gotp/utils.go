@@ -1,8 +1,9 @@
 package gotp
 
 import (
+	"crypto/rand"
+	"encoding/base32"
 	"fmt"
-	"math/rand"
 	"net/url"
 	"strings"
 	"time"
@@ -32,41 +33,46 @@ params:
 
 returns: provisioning uri
 */
-func BuildUri(otpType, secret, accountName, issuerName, algorithm string, initialCount, digits, period int) string {
+func BuildUri(otpType, secret, accountName, issuerName, algorithm string, initialCount, digits int, period int) string {
+	q := url.Values{}
+
 	if otpType != OtpTypeHotp && otpType != OtpTypeTotp {
 		panic("otp type error, got " + otpType)
 	}
-
-	urlParams := make([]string, 0)
-	urlParams = append(urlParams, "secret="+secret)
-	if otpType == OtpTypeHotp {
-		urlParams = append(urlParams, fmt.Sprintf("counter=%d", initialCount))
-	}
-	label := url.QueryEscape(accountName)
+	label := url.PathEscape(accountName)
 	if issuerName != "" {
-		issuerNameEscape := url.QueryEscape(issuerName)
-		label = issuerNameEscape + ":" + label
-		urlParams = append(urlParams, "issuer="+issuerNameEscape)
+		label = url.PathEscape(issuerName) + ":" + label
+		q.Set("issuer", url.QueryEscape(issuerName))
 	}
+	q.Set("secret", secret)
 	if algorithm != "" && algorithm != "sha1" {
-		urlParams = append(urlParams, "algorithm="+strings.ToUpper(algorithm))
+		q.Set("algorithm", strings.ToUpper(algorithm))
 	}
 	if digits != 0 && digits != 6 {
-		urlParams = append(urlParams, fmt.Sprintf("digits=%d", digits))
+		q.Set("digits", fmt.Sprintf("%d", digits))
 	}
 	if period != 0 && period != 30 {
-		urlParams = append(urlParams, fmt.Sprintf("period=%d", period))
+		q.Set("period", fmt.Sprintf("%d", period))
 	}
-	return fmt.Sprintf("otpauth://%s/%s?%s", otpType, label, strings.Join(urlParams, "&"))
+	if otpType == OtpTypeHotp {
+		q.Set("counter", fmt.Sprintf("%d", initialCount))
+	}
+	u := url.URL{
+		Scheme:   "otpauth",
+		Host:     otpType,
+		Path:     label,
+		RawQuery: q.Encode(),
+	}
+	return u.String()
 }
 
 // get current timestamp
-func currentTimestamp() int {
-	return int(time.Now().Unix())
+func currentTimestamp() int64 {
+	return time.Now().Unix()
 }
 
 // integer to byte array
-func Itob(integer int) []byte {
+func Itob(integer int64) []byte {
 	byteArr := make([]byte, 8)
 	for i := 7; i >= 0; i-- {
 		byteArr[i] = byte(integer & 0xff)
@@ -75,16 +81,27 @@ func Itob(integer int) []byte {
 	return byteArr
 }
 
-// generate a random secret of given length
+// generate a random secret of given length (number of bytes)
+// returns empty string if something bad happened
 func RandomSecret(length int) string {
-	rand.Seed(time.Now().UnixNano())
-	letterRunes := []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZ234567")
-
-	bytes := make([]rune, length)
-
-	for i := range bytes {
-		bytes[i] = letterRunes[rand.Intn(len(letterRunes))]
+	var result string
+	secret := make([]byte, length)
+	gen, err := rand.Read(secret)
+	if err != nil || gen != length {
+		// error reading random, return empty string
+		return result
 	}
+	var encoder = base32.StdEncoding.WithPadding(base32.NoPadding)
+	result = encoder.EncodeToString(secret)
+	return result
+}
 
-	return string(bytes)
+// A non-panic way of seeing weather or not a given secret is valid
+func IsSecretValid(secret string) bool {
+	missingPadding := len(secret) % 8
+	if missingPadding != 0 {
+		secret = secret + strings.Repeat("=", 8-missingPadding)
+	}
+	_, err := base32.StdEncoding.DecodeString(secret)
+	return err == nil
 }
