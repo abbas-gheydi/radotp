@@ -89,8 +89,10 @@ func CheckWebAdminPass(username string, pssword string) bool {
 
 func setCookie(w http.ResponseWriter, uname string) {
 	cookie := &http.Cookie{Name: "auth",
-		Value: generate_jwt(uname),
-		Path:  "/",
+		Value:    generate_jwt(uname),
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   true,
 	}
 	http.SetCookie(w, cookie)
 
