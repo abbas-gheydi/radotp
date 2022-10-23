@@ -38,6 +38,9 @@ func LoadConfigs() {
 
 	//database configs
 	storage.Dsn = fmt.Sprintf("host=%v user=%v password=%v dbname=%v port=%v sslmode=%v TimeZone=%v", Cfg.Database.Server, Cfg.Database.Username, Cfg.Database.Password, Cfg.Database.Dbname, Cfg.Database.Port, Cfg.Database.Sslmode, Cfg.Database.Timezone)
+	storage.MaxOpenConns = Cfg.Database.MaxOpenConns
+	storage.MaxIdleConns = Cfg.Database.MaxIdleConns
+	storage.ConnMaxLifetimeInMiuntes = Cfg.Database.ConnMaxLifetimeInMiuntes
 	//monitoring
 	monitoring.Listen = Cfg.Metrics.Listen
 	rad.EnableMetrics = Cfg.Metrics.EnablePrometheusExporter

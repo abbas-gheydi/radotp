@@ -54,9 +54,11 @@ type databaseconf struct {
 	Username,
 	Password,
 	Dbname,
-	Connection_max,
 	Sslmode,
 	Timezone string
+	MaxOpenConns,
+	MaxIdleConns,
+	ConnMaxLifetimeInMiuntes int
 }
 
 type LdapProvider struct {

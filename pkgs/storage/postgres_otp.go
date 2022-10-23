@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log"
 	"sync"
+	"time"
 
 	"gorm.io/driver/postgres"
 	_ "gorm.io/driver/sqlite"
@@ -15,8 +16,13 @@ const (
 	User_not_found string = "user not found"
 )
 
-var db_otp *gorm.DB
-var once sync.Once
+var (
+	MaxOpenConns,
+	MaxIdleConns,
+	ConnMaxLifetimeInMiuntes int
+	db_otp *gorm.DB
+	once   sync.Once
+)
 
 type otps struct {
 	ID       uint   `gorm:"primarykey"`
@@ -102,12 +108,17 @@ func (p postgresOtp) Connect() *gorm.DB {
 	var err error
 	once.Do(func() {
 
-		db_otp, err = gorm.Open(postgres.Open(Dsn), &gorm.Config{})
+		db_otp, err = gorm.Open(postgres.Open(Dsn), &gorm.Config{PrepareStmt: true})
 		if err != nil {
 			panic("failed to connect database")
 		}
 
 	})
+
+	sqlDB, err := db_otp.DB()
+	sqlDB.SetMaxOpenConns(MaxOpenConns)
+	sqlDB.SetMaxIdleConns(MaxIdleConns)
+	sqlDB.SetConnMaxLifetime(time.Duration(ConnMaxLifetimeInMiuntes) * time.Minute)
 
 	return db_otp
 }
