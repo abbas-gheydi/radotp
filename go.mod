@@ -7,6 +7,7 @@ require (
 	github.com/gorilla/mux v1.8.0
 	github.com/korylprince/go-ad-auth/v3 v3.2.0
 	github.com/prometheus/client_golang v1.13.0
+	github.com/pyroscope-io/client v0.4.0
 	github.com/spf13/viper v1.13.0
 	github.com/xlzd/gotp v0.0.0-20220915034741-1546cf172da8
 	gorm.io/driver/postgres v1.4.4
