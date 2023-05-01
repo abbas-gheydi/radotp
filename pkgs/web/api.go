@@ -51,8 +51,8 @@ func getUserNameParamFromUrl(r *http.Request) userCode {
 
 }
 func makeJsonResponse(w http.ResponseWriter, juser JsonUSer, statusCode int) {
-	w.WriteHeader(statusCode)
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
 	json.NewEncoder(w).Encode(juser)
 }
 
