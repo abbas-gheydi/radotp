@@ -15,10 +15,11 @@ RadOTP is a Radius server that is designed for "SSL VPN" authentication with two
     two_fa: two factors authenticate mode. AD password + OTP code.   
 
 ### How to Install
-Download [RadOTP](https://github.com/Abbas-gheydi/radotp/releases) and install it by:  
+first install docker and docker-compose then, Download [RadOTP](https://github.com/Abbas-gheydi/radotp/releases) and install it by:  
 ```bash
-sudo install ./radotp /usr/local/bin/
-````
+docker-compose build . 
+docker-compose up -d  
+```
 if you want to run it as a service, you must make a new [systemd serivce](https://www.suse.com/support/kb/doc/?id=000019672).   
 
 ### How to Use it:
