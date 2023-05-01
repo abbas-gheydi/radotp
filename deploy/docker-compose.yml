@@ -1,0 +1,35 @@
+version: "2"
+services:
+  radotp:
+   build: .
+   restart: always
+   ports:
+    - "8080:8080"
+    - "1812:1812/udp"
+   volumes:
+   - ./config/:/etc/radotp/
+   depends_on:
+   - db
+   - prometheus
+   
+  prometheus:
+   image: prom/prometheus
+   restart: always
+   volumes:
+   - prom_data:/prometheus-data
+   - type: bind
+     source: prometheus.yml
+     target: /etc/prometheus/prometheus.yml
+
+  db:
+    image: postgres:12
+    environment:
+      - POSTGRES_USER=radotp
+      - POSTGRES_PASSWORD=radotp
+      - POSTGRES_DB=radotp
+    restart: always
+    volumes:
+    - db_data:/var/lib/postgresql/data
+volumes:
+  db_data:
+  prom_data:

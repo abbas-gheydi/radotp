@@ -1,0 +1,15 @@
+global:
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+
+rule_files:
+
+scrape_configs:
+  - job_name: "radotp"
+
+
+    static_configs:
+      - targets: ["radotp:2111"]
