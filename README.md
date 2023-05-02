@@ -24,7 +24,7 @@ if you want to run it as a service, you must make a new [systemd serivce](https:
 
 ### How to Use it:
   
-- edit radiusd.conf (radotp.conf can be in current directory or in /etc/radotp/) then start docker compose or radotp service.       
+- edit radiusd.conf (it can be in current directory or in /etc/radotp/) then start docker compose or radotp service.       
 
 - in your browser, type IP_ADDRESS:8080 and use the admin/admin password to log in and manage users.   
 
