@@ -6,7 +6,7 @@ RadOTP is a Radius server that is designed for "SSL VPN" authentication with two
 * users activity is exposed to Prometheus and Grafana for alerting and monitoring purposes.   
 * It has a web interface to manage users.   
 * interactive mode using radius Access-Challenge.   
-* high availability, data saved in Postgres SQL. if you want HA, then make a Postgres cluster.   
+* high availability, data saved in Postgres SQL. if you want HA, then make a Postgres replication.   
 * it works in three modes:   
     only_password: authenticate users against Active Directory or any LDAP/LDAPS server.   
 
