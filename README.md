@@ -23,9 +23,9 @@ docker-compose up -d
 
 ### How to Use it:
   
-- edit config/radiusd.conf then start docker compose or radotp service.       
+- edit config/radiusd.conf then start docker compose.       
 
-- in your browser, type IP_ADDRESS:8080 and use the admin/admin password to log in and manage users.   
+- in your browser, type IP_ADDRESS:8080 and use the admin/admin password to login and manage users.   
 
 - Download [Google Authenticator](https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2&hl=en_US&gl=US) and scan the QR code.   
 
