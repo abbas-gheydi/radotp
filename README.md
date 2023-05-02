@@ -20,7 +20,6 @@ first install docker and docker-compose then, Download [RadOTP](https://github.c
 docker-compose build . 
 docker-compose up -d  
 ```
-if you want to run it as a service, you must make a new [systemd serivce](https://www.suse.com/support/kb/doc/?id=000019672).   
 
 ### How to Use it:
   
