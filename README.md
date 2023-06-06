@@ -27,7 +27,7 @@ docker-compose up -d
 
 - configure nginx as a reverse proxy and ssl termination https://github.com/Abbas-gheydi/radotp/discussions/2#discussioncomment-6096778     
 
-- in your browser, type IP_ADDRESS:8080 and use the admin/admin password to login and manage users.   
+- in your browser, type http**s**://IP_ADDRESS and use the admin/admin password to login and manage users.   
 
 - Download [Google Authenticator](https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2&hl=en_US&gl=US) and scan the QR code.   
 
