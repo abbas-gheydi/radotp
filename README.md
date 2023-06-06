@@ -23,7 +23,9 @@ docker-compose up -d
 
 ### How to Use it:
   
-- edit config/radiusd.conf then start docker compose.       
+- edit config/radiusd.conf then start docker compose. 
+
+- configure nginx as a reverse proxy and ssl termination https://github.com/Abbas-gheydi/radotp/discussions/2#discussioncomment-6096778     
 
 - in your browser, type IP_ADDRESS:8080 and use the admin/admin password to login and manage users.   
 
