@@ -71,3 +71,12 @@ func SetAdminPassword(password string) {
 	webAdminDatabseEngine.SetAdminPassword(password)
 
 }
+
+func IsUserExist(username string) (userExist bool) {
+	SearchResualt, getErr := Get(username)
+	if getErr != nil {
+		return false
+	}
+	return SearchResualt != ""
+
+}

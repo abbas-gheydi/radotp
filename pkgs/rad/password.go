@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/Abbas-gheydi/radotp/pkgs/authentiate"
+	"github.com/Abbas-gheydi/radotp/pkgs/storage"
 
 	"layeh.com/radius"
 	"layeh.com/radius/rfc2865"
@@ -25,10 +26,19 @@ func User_PassHandler(w radius.ResponseWriter, r *radius.Request) {
 
 	if IsUserPassValied(Auth_Provider, username, password) {
 		//check config
-		if RadiusConfigs.Authentication_Mode == "only_password" {
+		switch RadiusConfigs.Authentication_Mode {
+		case only_password:
 			code = AcceptUser(w, r, label_ldap_stage)
-		} else {
+		case two_fa_optional_otp:
+			if !storage.IsUserExist(username) {
+				code = AcceptUser(w, r, label_ldap_stage)
+			} else {
+				code = SendForChalenge(w, r, label_ldap_stage)
+			}
+
+		case two_fa:
 			code = SendForChalenge(w, r, label_ldap_stage)
+
 		}
 
 	} else {
@@ -65,15 +75,4 @@ func IsUserPassValied(auth_provider authentiate.Auth_Provider, username string, 
 	// user pass is invalied
 	return false
 
-}
-
-func mustCheckPassword(state string) bool {
-	// check setting
-	if RadiusConfigs.Authentication_Mode == "only_otp" {
-		return false
-	} else {
-
-		// if state is empty then user must auth with password
-		return state == ""
-	}
 }

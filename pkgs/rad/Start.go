@@ -14,6 +14,13 @@ type RadConfs struct {
 	Authentication_Mode        string //only_otp, only_password, two_fa
 }
 
+const (
+	only_password       = "only_password"
+	only_otp            = "only_otp"
+	two_fa              = "two_fa"
+	two_fa_optional_otp = "two_fa_optional_otp"
+)
+
 var RadiusConfigs RadConfs
 
 func StartRadius() {
@@ -26,8 +33,7 @@ func StartRadius() {
 			log.Println("password is empty for user: ", rfc2865.UserName_GetString(r.Packet))
 		}
 
-		state := rfc2865.State_GetString(r.Packet)
-		if mustCheckPassword(state) {
+		if mustCheckPassword() {
 			User_PassHandler(w, r)
 
 		} else {
@@ -47,4 +53,12 @@ func StartRadius() {
 	if err := server.ListenAndServe(); err != nil {
 		log.Fatal(err)
 	}
+}
+
+func mustCheckPassword() bool {
+	// check setting
+	if RadiusConfigs.Authentication_Mode == only_otp {
+		return false
+	}
+	return true
 }
