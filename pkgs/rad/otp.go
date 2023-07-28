@@ -20,13 +20,13 @@ func otpHandler(w radius.ResponseWriter, r *radius.Request) {
 	state := rfc2865.State_GetString(paket)
 	var code radius.Code
 
-	stateInPool, _ := inMemoryPool.Lookup(username)
+	stateInPool, _ := states.Lookup(username)
 	if isStateValied(state, stateInPool) {
 		//log.Println("state is ok")
 		if IsOtpCodeValied(username, password) {
 			code = AcceptUser(w, r, label_otp_stage)
 			//delete user from statepool
-			inMemoryPool.Delete(username)
+			states.Delete(username)
 		} else {
 
 			code = RejectUser(w, r, label_otp_stage)

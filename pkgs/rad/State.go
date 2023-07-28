@@ -7,7 +7,7 @@ import (
 	"sync"
 )
 
-var inMemoryPool Statepool
+var states Statepool
 var statePoolMutex sync.Mutex
 
 //Todo: make a chalnege pool

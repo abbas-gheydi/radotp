@@ -16,9 +16,10 @@ var (
 )
 
 type LdapProvider struct {
-	LdapConfig  *ldapAuth.Config
-	Groups      []string
-	LdapServers []string
+	LdapConfig      *ldapAuth.Config
+	Groups          []string
+	LdapServers     []string
+	LdapGroupFilter string
 }
 
 func (l LdapProvider) changeLdapSegver() {

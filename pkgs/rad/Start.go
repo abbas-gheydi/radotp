@@ -25,7 +25,7 @@ var RadiusConfigs RadConfs
 
 func StartRadius() {
 
-	inMemoryPool.Init()
+	states.Init()
 
 	handler := func(w radius.ResponseWriter, r *radius.Request) {
 		log.Print("received a radius packet for user: ", rfc2865.UserName_GetString(r.Packet))

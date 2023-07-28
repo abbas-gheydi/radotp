@@ -41,7 +41,7 @@ func RejectUser(w radius.ResponseWriter, r *radius.Request, stage string) (code 
 func SendForChalenge(w radius.ResponseWriter, r *radius.Request, stage string) (code radius.Code) {
 	paket := r.Packet.Response(radius.CodeAccessChallenge)
 	username := rfc2865.UserName_GetString(r.Packet)
-	stateInOurPool, _ := inMemoryPool.Lookup(username)
+	stateInOurPool, _ := states.Lookup(username)
 	//stateInOurPool, groupInOurpoll := inMemoryPool.Lookup(username)
 
 	//pool.Insert(username)
@@ -58,7 +58,7 @@ func SendForChalenge(w radius.ResponseWriter, r *radius.Request, stage string) (
 }
 
 func AddVendorGroup(p *radius.Packet, r *radius.Request) {
-	_, usergroup := inMemoryPool.Lookup(rfc2865.UserName_GetString(r.Packet))
+	_, usergroup := states.Lookup(rfc2865.UserName_GetString(r.Packet))
 
 	if RadiusConfigs.Enable_Fortinet_Group_Name {
 

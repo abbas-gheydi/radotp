@@ -65,10 +65,9 @@ func IsUserPassValied(auth_provider authentiate.Auth_Provider, username string, 
 		} else {
 			usergroup = group[0]
 		}
-
-		inMemoryPool.Insert(username, usergroup)
-
-		//log.Print(username, " group is ", group)
+		if RadiusConfigs.Authentication_Mode == two_fa || RadiusConfigs.Authentication_Mode == two_fa_optional_otp {
+			states.Insert(username, usergroup)
+		}
 		return true
 
 	}
