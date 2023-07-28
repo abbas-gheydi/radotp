@@ -56,9 +56,8 @@ func (l LdapProvider) IsUserAuthenticated(username string, password string) (aut
 		log.Println(err)
 		//if group name in settings is not true
 		if strings.Contains(err.Error(), "Search error") {
+			log.Println(l.Groups, "Group name invalid. Check settings.")
 
-			l.Groups = nil
-			authStat, _, groups, _ = ldapAuth.AuthenticateExtended(l.LdapConfig, username, password, []string{"cn"}, l.Groups)
 		}
 		//try another ldap server
 		if strings.Contains(err.Error(), "Connection error") {
