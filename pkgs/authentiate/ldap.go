@@ -16,27 +16,23 @@ var (
 )
 
 type LdapProvider struct {
-	LdapConfig      *ldapAuth.Config
-	Groups          []string
-	LdapServers     []string
-	LdapGroupFilter string
+	LdapConfig       *ldapAuth.Config
+	FortiGroups      []string
+	LdapServers      []string
+	LdapGroupsFilter []string
 }
 
 func (l LdapProvider) changeLdapSegver() {
 	if len(l.LdapServers) > 1 && time.Now().After(lastTimeLdapProviderChanged.Add(switchToAnotherLdapServerInterval)) {
 		ldapMutex.Lock()
-
 		for _, srv := range l.LdapServers {
 			if srv == l.LdapConfig.Server {
 				continue
 			}
-
 			l.LdapConfig.Server = srv
 			log.Println("change ldap server to ", srv)
 			lastTimeLdapProviderChanged = time.Now()
-
 			break
-
 		}
 		ldapMutex.Unlock()
 
@@ -44,30 +40,52 @@ func (l LdapProvider) changeLdapSegver() {
 
 }
 
-func (l LdapProvider) IsUserAuthenticated(username string, password string) (authStat bool, groups []string) {
-	ldapMutex.RLock()
-	//log.Println("ldap server address", l.LdapConfig.Server)
-	authStat, _, groups, err := ldapAuth.AuthenticateExtended(l.LdapConfig, username, password, []string{"cn"}, l.Groups)
-	//log.Printf("status %v entry %v groups %v", authStat, entry, groups)
-	defer ldapMutex.RLocker().Unlock()
+func (l LdapProvider) isUserAuthorized(groups []string) bool {
+	if len(l.LdapGroupsFilter) == 0 {
+		return true
+	}
+	for _, g := range groups {
+		if g == l.LdapGroupsFilter[0] {
+			return true
+		}
+	}
+	return false
+}
+
+func (l LdapProvider) IsUserAuthenticated(username string, password string, checkForVendorFortinetGroup bool) (authStat bool, vendorFortinetGroupName []string) {
+
+	verifyPasswordAndRetrieveGroupsFromLdap := func(groups []string) (authStat bool, joinedGroupsName []string, err error) {
+		ldapMutex.RLock()
+		defer ldapMutex.RLocker().Unlock()
+		authStat, _, joinedGroupsName, err = ldapAuth.AuthenticateExtended(l.LdapConfig, username, password, []string{"cn"}, groups)
+		return
+	}
+
+	authStat, joinedGroupsName, err := verifyPasswordAndRetrieveGroupsFromLdap(l.LdapGroupsFilter)
+
+	if authStat {
+		authStat = l.isUserAuthorized(joinedGroupsName)
+	}
+
+	if checkForVendorFortinetGroup {
+		if authStat {
+			_, vendorFortinetGroupName, err = verifyPasswordAndRetrieveGroupsFromLdap(l.FortiGroups)
+		}
+	}
 
 	if err != nil {
 
 		log.Println(err)
 		//if group name in settings is not true
 		if strings.Contains(err.Error(), "Search error") {
-			log.Println(l.Groups, "Group name invalid. Check settings.")
-
+			log.Println(l.FortiGroups, "Group name invalid. Check settings.")
 		}
 		//try another ldap server
 		if strings.Contains(err.Error(), "Connection error") {
 			go l.changeLdapSegver()
 		}
-
 		return
-
 	}
-
 	return
 
 }

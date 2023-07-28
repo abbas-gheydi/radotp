@@ -28,7 +28,7 @@ func LoadConfigs() {
 
 	//ldap configs
 	//rad.Auth_Provider = cfg.Ldap
-	rad.Auth_Provider.Groups = Cfg.Ldap.Groups
+	rad.Auth_Provider.FortiGroups = Cfg.Ldap.Groups
 	rad.Auth_Provider.LdapConfig = &ldapAuth.Config{}
 	rad.Auth_Provider.LdapConfig.BaseDN = Cfg.Ldap.Basedn
 	rad.Auth_Provider.LdapConfig.Port = Cfg.Ldap.Port

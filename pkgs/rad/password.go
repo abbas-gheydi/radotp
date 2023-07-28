@@ -55,7 +55,7 @@ func IsUserPassValied(auth_provider authentiate.Auth_Provider, username string, 
 		return false
 	}
 	var usergroup string
-	authe_state, group := auth_provider.IsUserAuthenticated(username, password)
+	authe_state, group := auth_provider.IsUserAuthenticated(username, password, RadiusConfigs.Enable_Fortinet_Group_Name)
 	//log.Printf("auth state %v group %v", authe_state, group)
 	if authe_state {
 		//user pass is ok
