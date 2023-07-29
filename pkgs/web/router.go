@@ -2,6 +2,7 @@ package web
 
 import (
 	"log"
+	"net"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -33,14 +34,35 @@ func StartRouter() {
 	router.Handle("/api/v1/user/{username}", restApiMustAuth(apiUpdateUser)).Methods(http.MethodPost)
 	log.Println("HTTP Interface Listen on:", HTTPListenAddr)
 	log.Println("HTTPS Interface Listen on:", HTTPSListenAddr)
-	go func() {
-		err := http.ListenAndServe(HTTPListenAddr, router)
-		if err != nil {
-			log.Println(err)
-		}
-	}()
+	go httpListenAndServe(router)
 	err := http.ListenAndServeTLS(HTTPSListenAddr, server_crt, server_key, router)
 	if err != nil {
 		log.Println(err)
+	}
+}
+
+func httpListenAndServe(defaultRouter *mux.Router) {
+	if RedirectToHTTPS {
+		redirecrtRouter := mux.NewRouter()
+		redirecrtRouter.PathPrefix("/").HandlerFunc(redirectToHttps)
+		http.ListenAndServe(HTTPListenAddr, redirecrtRouter)
+	} else {
+		err := http.ListenAndServe(HTTPListenAddr, defaultRouter)
+		if err != nil {
+			log.Println(err)
+		}
+	}
+}
+
+func redirectToHttps(w http.ResponseWriter, r *http.Request) {
+	host, _, err := net.SplitHostPort(r.Host)
+	if err != nil {
+		log.Println("err")
+		u := r.URL
+		u.Host = net.JoinHostPort(host, RedirectToHTTPSPortNumber)
+		u.Scheme = "https"
+		http.Redirect(w, r, u.String(), http.StatusTemporaryRedirect)
+	} else {
+		w.WriteHeader(500)
 	}
 }
