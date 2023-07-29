@@ -20,7 +20,10 @@ func LoadConfigs() {
 	rad.RadiusConfigs = Cfg.Radius
 
 	//web configs
-	web.ListenAddr = Cfg.Web.Listen
+	web.HTTPListenAddr = Cfg.Web.ListenHTTP
+	web.HTTPSListenAddr = Cfg.Web.ListenHTTPS
+	web.RedirectToHTTPS = Cfg.Web.RedirectToHTTPS
+	web.RedirectToHTTPSPortNumber = Cfg.Web.RedirectToHTTPSPortNumber
 	web.QrIssuer = Cfg.Web.Isuuer
 	web.ApiKey = Cfg.Web.Apikey
 	web.PromethuesServerAddress = Cfg.Metrics.PromethuesAddress
@@ -28,7 +31,8 @@ func LoadConfigs() {
 
 	//ldap configs
 	//rad.Auth_Provider = cfg.Ldap
-	rad.Auth_Provider.FortiGroups = Cfg.Ldap.Groups
+	rad.Auth_Provider.FortiGroups = Cfg.Ldap.FortiGroups
+	rad.Auth_Provider.LdapGroupsFilter = []string{Cfg.Ldap.LdapGroupsFilter}
 	rad.Auth_Provider.LdapConfig = &ldapAuth.Config{}
 	rad.Auth_Provider.LdapConfig.BaseDN = Cfg.Ldap.Basedn
 	rad.Auth_Provider.LdapConfig.Port = Cfg.Ldap.Port

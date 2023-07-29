@@ -38,10 +38,13 @@ func (c *Configurations) Load() {
 }
 
 type webconf struct {
-	Listen        string
-	Isuuer        string
-	Apikey        string
-	EnableRestApi bool
+	ListenHTTP                string
+	ListenHTTPS               string
+	RedirectToHTTPS           bool
+	RedirectToHTTPSPortNumber string
+	Isuuer                    string
+	Apikey                    string
+	EnableRestApi             bool
 }
 type metrics struct {
 	EnablePrometheusExporter bool
@@ -62,9 +65,10 @@ type databaseconf struct {
 }
 
 type LdapProvider struct {
-	Groups      []string
-	LdapServers []string
-	Basedn      string
-	Port        int
-	Security    int
+	FortiGroups      []string
+	LdapGroupsFilter string
+	LdapServers      []string
+	Basedn           string
+	Port             int
+	Security         int
 }

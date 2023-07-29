@@ -31,9 +31,16 @@ func StartRouter() {
 	router.Handle("/api/v1/user/{username}", restApiMustAuth(apiCreateUser)).Methods(http.MethodPut)
 	router.Handle("/api/v1/user/{username}", restApiMustAuth(apiDeleteUser)).Methods(http.MethodDelete)
 	router.Handle("/api/v1/user/{username}", restApiMustAuth(apiUpdateUser)).Methods(http.MethodPost)
-
-	log.Println("Web Interface Listen on:", ListenAddr)
-
-	http.ListenAndServe(ListenAddr, router)
-
+	log.Println("HTTP Interface Listen on:", HTTPListenAddr)
+	log.Println("HTTPS Interface Listen on:", HTTPSListenAddr)
+	go func() {
+		err := http.ListenAndServe(HTTPListenAddr, router)
+		if err != nil {
+			log.Println(err)
+		}
+	}()
+	err := http.ListenAndServeTLS(HTTPSListenAddr, server_crt, server_key, router)
+	if err != nil {
+		log.Println(err)
+	}
 }

@@ -20,17 +20,16 @@ const (
 	disabled_OTP_Code_for_User string = "Disabled OTP Code for User"
 )
 
-var ListenAddr = "0.0.0.0:8080"
-var QrIssuer = "radotp"
-
-//go:embed templates
-var templates embed.FS
-
-//go:embed assets
-var assets embed.FS
-
-//go:embed swager
-var swager embed.FS
+var (
+	HTTPListenAddr = "0.0.0.0:8080"
+	QrIssuer       = "radotp"
+	//go:embed templates
+	templates embed.FS
+	//go:embed assets
+	assets embed.FS
+	//go:embed swager
+	swager embed.FS
+)
 
 type userCode struct {
 	UserName string
