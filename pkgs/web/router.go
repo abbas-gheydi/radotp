@@ -58,11 +58,13 @@ func redirectToHttps(w http.ResponseWriter, r *http.Request) {
 	host, _, err := net.SplitHostPort(r.Host)
 	if err != nil {
 		log.Println("err")
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Internal Server Error"))
+
+	} else {
 		u := r.URL
 		u.Host = net.JoinHostPort(host, RedirectToHTTPSPortNumber)
 		u.Scheme = "https"
 		http.Redirect(w, r, u.String(), http.StatusTemporaryRedirect)
-	} else {
-		w.WriteHeader(500)
 	}
 }
