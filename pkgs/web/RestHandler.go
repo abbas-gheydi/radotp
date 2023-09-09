@@ -9,7 +9,7 @@ import (
 
 var (
 	bearerPrefix  = "Bearer "
-	ApiKey        = ""
+	ApiKey        string
 	EnableRestApi bool
 )
 
