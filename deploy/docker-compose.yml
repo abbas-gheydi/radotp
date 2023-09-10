@@ -25,9 +25,9 @@ services:
   db:
     image: postgres:12
     environment:
-      - POSTGRES_USER=radotp
-      - POSTGRES_PASSWORD=radotp
-      - POSTGRES_DB=radotp
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=dbpassword
+      - POSTGRES_DB=postgres
     restart: always
     volumes:
     - db_data:/var/lib/postgresql/data
