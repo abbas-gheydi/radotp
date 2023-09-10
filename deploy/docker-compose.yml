@@ -1,10 +1,11 @@
 version: "2"
 services:
   radotp:
-   build: .
+   image: ghcr.io/abbas-gheydi/radotp:main
    restart: always
    ports:
-    - "8080:8080"
+    - "80:8080"
+    - "443:8081"
     - "1812:1812/udp"
    volumes:
    - ./config/:/etc/radotp/
@@ -13,7 +14,7 @@ services:
    - prometheus
    
   prometheus:
-   image: prom/prometheus
+   image: prom/prometheus:v2.47.0
    restart: always
    volumes:
    - prom_data:/prometheus-data
