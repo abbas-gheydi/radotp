@@ -1,5 +1,5 @@
 
-FROM golang:1.20 AS build
+FROM golang:1.20-bullseye AS build
 
 WORKDIR /
 
