@@ -7,7 +7,7 @@ COPY . .
 
 RUN ls -la
 
-RUN go mod download && go build -o /radotp .
+RUN go mod download || go build -o /radotp .
 
 FROM ubuntu:20.04 as radotp
 
