@@ -19,6 +19,8 @@ COPY radiusd.conf /etc/radotp
 
 COPY --from=build /radotp /bin/radotp
 
+RUN apt update && apt install -y openssl
+
 ENTRYPOINT [ "/bin/radotp" ]
 
 EXPOSE 8080 8081
