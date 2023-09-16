@@ -1,6 +1,9 @@
 # RadOTP
 ## About The Project
 RadOTP is a dedicated Radius server expertly tailored to serve as a two-factor authentication source for VPN users on firewalls like Fortigate and Cisco ASA.
+
+
+
 ```
   +----------------------------------+
   | Corporate Network                |
@@ -31,32 +34,32 @@ RadOTP is a dedicated Radius server expertly tailored to serve as a two-factor a
 
 ```
 
- It has the following features:
+ **It has the following features**:
 
-•  It supports two-factor authentication (2FA) using one-time passwords (OTP) that are generated and stored in a PostgreSQL database.
+-  It supports two-factor authentication (2FA) using one-time passwords (OTP) that are generated and stored in a PostgreSQL database.
 
-•  It can connect to Microsoft Active Directory using an LDAP client and verify users' credentials.
+-  It can connect to Microsoft Active Directory using an LDAP client and verify users' credentials.
 
-•  It has a web interface that allows administrators to manage users, view logs, and configure settings.
+-  It has a web interface that allows administrators to manage users, view logs, and configure settings.
 
-•  It exposes users' activity to Prometheus and Grafana for monitoring and alerting purposes.
+-  It exposes users' activity to Prometheus and Grafana for monitoring and alerting purposes.
 
-•  It uses radius Access-Challenge to interact with users and request additional information.
+-  It uses radius Access-Challenge to interact with users and request additional information.
 
-•  It offers high availability and performance by using PostgreSQL replication and docker-compose deployment.
+-  It offers high availability and performance by using PostgreSQL replication and docker-compose deployment.
 
-•  It has a REST API that enables external applications to manage users programmatically.
+-  It has a REST API that enables external applications to manage users programmatically.
 
 
+**The radius server supports four modes of authentication:**
+  
+-  only_password: This mode authenticates users against an Active Directory LDAP/LDAPS server. Users only need to enter their AD password to log in.
 
-* The radius server supports four modes of authentication:
-•  only_password: This mode authenticates users against an Active Directory LDAP/LDAPS server. Users only need to enter their AD password to log in.
+-  only_otp: This mode authenticates users with an OTP database only. Users only need to enter a one-time password (OTP) code to log in.
 
-•  only_otp: This mode authenticates users with an OTP database only. Users only need to enter a one-time password (OTP) code to log in.
+-  two_fa: This mode enables two-factor authentication (2FA). Users need to enter both their AD password and an OTP code to log in.
 
-•  two_fa: This mode enables two-factor authentication (2FA). Users need to enter both their AD password and an OTP code to log in.
-
-•  two_fa_optional_otp: This mode is similar to two_fa, but it only applies 2FA to users who have an OTP in the database. Users who do not have an OTP can log in with their AD password only.
+-  two_fa_optional_otp: This mode is similar to two_fa, but it only applies 2FA to users who have an OTP in the database. Users who do not have an OTP can log in with their AD password only.
 
 ![RadOTP](https://github.com/Abbas-gheydi/radotp/blob/main/assets/radotp.jpg)
 
