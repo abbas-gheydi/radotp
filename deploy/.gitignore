@@ -1,1 +1,4 @@
 radotp
+server.crt
+server.key
+
