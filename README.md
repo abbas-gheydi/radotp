@@ -6,7 +6,7 @@ RadOTP is a dedicated Radius server expertly tailored to serve as a two-factor a
 
 ```
   +----------------------------------+
-  | Corporate Network                |
+  | internet                         |
   |                                  |
   |   +--------------------------+   |
   |   | User                     |   |
@@ -15,8 +15,14 @@ RadOTP is a dedicated Radius server expertly tailored to serve as a two-factor a
   |   | Password: [YourPassword] |   |
   |   | OTP:      [YourOTP]      |   |
   |   +--------------------------+   |
-  |              |                   |
-  |              v                   |
+  +----------------------------------+
+
+                 |
+                 v
+ 
+  +----------------------------------+
+  | Corporate Network                |
+  |                                  |
   |   +--------------------------+   |
   |   | Fortigate SSL VPN        |   |
   |   |--------------------------|   |
