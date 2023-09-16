@@ -4,6 +4,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"strings"
 
 	"github.com/gorilla/mux"
 )
@@ -57,14 +58,19 @@ func httpListenAndServe(defaultRouter *mux.Router) {
 func redirectToHttps(w http.ResponseWriter, r *http.Request) {
 	host, _, err := net.SplitHostPort(r.Host)
 	if err != nil {
-		log.Println("err")
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Internal Server Error"))
+		if strings.Contains(err.Error(), "missing port in address") {
+			host = r.Host
+		} else {
+			log.Println("redirectToHttps", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("Internal Server Error"))
 
-	} else {
-		u := r.URL
-		u.Host = net.JoinHostPort(host, RedirectToHTTPSPortNumber)
-		u.Scheme = "https"
-		http.Redirect(w, r, u.String(), http.StatusTemporaryRedirect)
+		}
 	}
+
+	u := r.URL
+	u.Host = net.JoinHostPort(host, RedirectToHTTPSPortNumber)
+	u.Scheme = "https"
+	http.Redirect(w, r, u.String(), http.StatusTemporaryRedirect)
+
 }
