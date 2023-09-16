@@ -113,7 +113,7 @@ func StartRadius()
 
 
 <a name="User_PassHandler"></a>
-## func [User\\\_PassHandler](<https://github.com/Abbas-gheydi/radotp/blob/main/pkgs/rad/password.go#L20>)
+## func [User_PassHandler](<https://github.com/Abbas-gheydi/radotp/blob/main/pkgs/rad/password.go#L20>)
 
 ```go
 func User_PassHandler(w radius.ResponseWriter, r *radius.Request)
