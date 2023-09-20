@@ -70,7 +70,7 @@ RadOTP is a dedicated Radius server expertly tailored to serve as a two-factor a
 ![RadOTP](https://github.com/Abbas-gheydi/radotp/blob/main/assets/radotp.jpg)
 
 ### How to Install
-first install docker and docker-compose then, Download [RadOTP](https://github.com/Abbas-gheydi/radotp/releases) and deploy it by:  
+first install docker and docker-compose then, Download [RadOTP](https://github.com/Abbas-gheydi/radotp/releases/latest) and deploy it by:  
 ```bash
 docker-compose up -d  
 ```
