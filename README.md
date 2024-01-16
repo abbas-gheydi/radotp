@@ -2,8 +2,6 @@
 ## About The Project
 RadOTP is a dedicated Radius server expertly tailored to serve as a two-factor authentication source for VPN users on firewalls like Fortigate and Cisco ASA.
 
-
-
 ```
   +----------------------------------+
   | internet                         |
