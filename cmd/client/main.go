@@ -56,12 +56,31 @@ func main() {
 			rfc2865.UserName_SetString(packet, username)
 			rfc2865.UserPassword_SetString(packet, password)
 			response, err := radius.Exchange(context.Background(), packet, server)
-			wg.Done()
 			if err != nil {
 				log.Fatal(err)
 			}
 
 			log.Println("Code:", response.Code)
+			if response.Code == radius.CodeAccessChallenge {
+				state := rfc2865.State_GetString(response)
+				var otpCode string
+				fmt.Println(rfc2865.ReplyMessage_GetString(response))
+				if _, err := fmt.Scanln(&otpCode); err != nil {
+					log.Println(err)
+				}
+
+				rfc2865.UserPassword_SetString(packet, otpCode)
+				rfc2865.State_SetString(packet, state)
+				challengeResponse, err := radius.Exchange(context.Background(), packet, server)
+				if err != nil {
+					log.Fatal(err)
+				}
+				log.Print("Code:", challengeResponse.Code)
+
+			}
+
+			wg.Done()
+
 		}()
 	}
 	wg.Wait()

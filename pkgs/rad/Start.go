@@ -33,7 +33,7 @@ func StartRadius() {
 			log.Println("password is empty for user: ", rfc2865.UserName_GetString(r.Packet))
 		}
 
-		if mustCheckPassword() {
+		if mustCheckPassword() && rfc2865.State_GetString(r.Packet) == "" {
 			User_PassHandler(w, r)
 
 		} else {
