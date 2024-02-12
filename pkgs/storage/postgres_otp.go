@@ -2,7 +2,9 @@ package storage
 
 import (
 	"errors"
+	"fmt"
 	"log"
+	"strings"
 	"sync"
 	"time"
 
@@ -33,6 +35,16 @@ type otps struct {
 type postgresOtp struct{}
 
 func (p postgresOtp) Set(username string, secret string) error {
+	username = strings.ToLower(username)
+
+	if strings.Contains(username, "@") || strings.Contains(username, "\\") {
+		splitChar := "@"
+		if strings.Contains(username, "\\") {
+			splitChar = "\\"
+		}
+		return fmt.Errorf("username is not valid. please insert a username without %v", splitChar)
+
+	}
 
 	otpUser := otps{
 		Username: username,
@@ -49,6 +61,7 @@ func (p postgresOtp) Set(username string, secret string) error {
 }
 
 func (p postgresOtp) Update(username string, secret string) error {
+	username = strings.ToLower(username)
 
 	otpUser := otps{
 		Username: username,
@@ -71,6 +84,7 @@ func (p postgresOtp) Update(username string, secret string) error {
 }
 
 func (p postgresOtp) Delete(username string) error {
+	username = strings.ToLower(username)
 
 	otpUser := otps{Username: username}
 	tx := db_otp.Model(&otpUser).Where("username = ?", username).Delete(otpUser)
@@ -88,11 +102,24 @@ func (p postgresOtp) Delete(username string) error {
 }
 
 func (p postgresOtp) Get(username string) (password string, err error) {
-
+	username = strings.ToLower(username)
+	if strings.Contains(username, "\\") {
+		splitChar := "\\"
+		username = strings.Split(username, splitChar)[0]
+	}
 	otpUser := otps{Username: username}
 
 	tx := db_otp.First(&otpUser, "Username = ?", username)
+	if tx.Error != nil && strings.Contains(tx.Error.Error(), "record not found") {
+		if strings.Contains(username, "@") {
+			splitChar := "@"
+			username = strings.Split(username, splitChar)[0]
+			tx = db_otp.First(&otpUser, "Username = ?", username)
+		}
+
+	}
 	if tx.Error != nil {
+
 		return "", tx.Error
 	}
 

@@ -6,7 +6,7 @@ import (
 	"unicode"
 )
 
-var usernameRegexp = regexp.MustCompile(`^[0-9A-Za-z_.@\-]{1,30}$`)
+var usernameRegexp = regexp.MustCompile(`^[0-9A-Za-z_.\-]{1,30}[@|\\]?[0-9A-Za-z_.\-]{1,30}$`)
 
 func IsOtpCodeSafe(input string) bool {
 	if len([]rune(input)) != 6 {

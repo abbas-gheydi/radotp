@@ -52,23 +52,28 @@ func (l LdapProvider) isUserAuthorized(groups []string) bool {
 	return false
 }
 
-func (l LdapProvider) IsUserAuthenticated(username string, password string, checkForVendorFortinetGroup bool) (authStat bool, vendorFortinetGroupName []string) {
+func (l LdapProvider) IsUserAuthenticated(username string, password string, checkForVendorFortinetGroup bool) (isAuthenticated bool, vendorFortinetGroupName []string) {
 
-	verifyPasswordAndRetrieveGroupsFromLdap := func(groups []string) (authStat bool, joinedGroupsName []string, err error) {
+	if strings.Contains(username, "\\") {
+		splitChar := "\\"
+		username = strings.Split(username, splitChar)[0]
+	}
+
+	verifyPasswordAndRetrieveGroupsFromLdap := func(groups []string) (isAuthenticated bool, joinedGroupsName []string, err error) {
 		ldapMutex.RLock()
 		defer ldapMutex.RLocker().Unlock()
-		authStat, _, joinedGroupsName, err = ldapAuth.AuthenticateExtended(l.LdapConfig, username, password, []string{"cn"}, groups)
+		isAuthenticated, _, joinedGroupsName, err = ldapAuth.AuthenticateExtended(l.LdapConfig, username, password, []string{"cn"}, groups)
 		return
 	}
 
-	authStat, joinedGroupsName, err := verifyPasswordAndRetrieveGroupsFromLdap(l.LdapGroupsFilter)
+	isAuthenticated, joinedGroupsName, err := verifyPasswordAndRetrieveGroupsFromLdap(l.LdapGroupsFilter)
 
-	if authStat {
-		authStat = l.isUserAuthorized(joinedGroupsName)
+	if isAuthenticated {
+		isAuthenticated = l.isUserAuthorized(joinedGroupsName)
 	}
 
 	if checkForVendorFortinetGroup {
-		if authStat {
+		if isAuthenticated {
 			_, vendorFortinetGroupName, err = verifyPasswordAndRetrieveGroupsFromLdap(l.FortiGroups)
 		}
 	}
