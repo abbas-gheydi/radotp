@@ -53,10 +53,9 @@ func (l LdapProvider) isUserAuthorized(groups []string) bool {
 }
 
 func (l LdapProvider) IsUserAuthenticated(username string, password string, checkForVendorFortinetGroup bool) (isAuthenticated bool, vendorFortinetGroupName []string) {
-
-	if strings.Contains(username, "\\") {
-		splitChar := "\\"
-		username = strings.Split(username, splitChar)[0]
+	winNTSplitChar := "\\"
+	if strings.Contains(username, winNTSplitChar) && strings.Split(username, winNTSplitChar)[1] != "" {
+		username = strings.Split(username, winNTSplitChar)[1]
 	}
 
 	verifyPasswordAndRetrieveGroupsFromLdap := func(groups []string) (isAuthenticated bool, joinedGroupsName []string, err error) {

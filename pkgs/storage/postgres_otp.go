@@ -103,9 +103,9 @@ func (p postgresOtp) Delete(username string) error {
 
 func (p postgresOtp) Get(username string) (password string, err error) {
 	username = strings.ToLower(username)
-	if strings.Contains(username, "\\") {
-		splitChar := "\\"
-		username = strings.Split(username, splitChar)[0]
+	winNTSplitChar := "\\"
+	if strings.Contains(username, winNTSplitChar) && strings.Split(username, winNTSplitChar)[1] != "" {
+		username = strings.Split(username, winNTSplitChar)[1]
 	}
 	otpUser := otps{Username: username}
 
