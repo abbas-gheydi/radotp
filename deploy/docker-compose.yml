@@ -19,7 +19,7 @@ services:
    volumes:
    - prom_data:/prometheus-data
    - type: bind
-     source: prometheus.yml
+     source: ./prometheus.yml
      target: /etc/prometheus/prometheus.yml
 
   db:
