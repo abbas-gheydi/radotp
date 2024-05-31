@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	ldapAuth "github.com/korylprince/go-ad-auth/v3"
+	ldapAuth "github.com/abbas-gheydi/go-ad-auth/v3"
 )
 
 var (

@@ -23,8 +23,8 @@ func (c *Configurations) Load() {
 
 	viper.SetConfigName("radiusd.conf")
 	viper.SetConfigType("toml")
-	viper.AddConfigPath("/etc/motp/")
 	viper.AddConfigPath("/etc/radotp/")
+	viper.AddConfigPath("/etc/motp/")
 	viper.AddConfigPath(".")
 	err := viper.ReadInConfig()
 	if err != nil {
@@ -65,10 +65,11 @@ type databaseconf struct {
 }
 
 type LdapProvider struct {
-	FortiGroups      []string
-	LdapGroupsFilter string
-	LdapServers      []string
-	Basedn           string
-	Port             int
-	Security         int
+	FortiGroups                  []string
+	LdapGroupsFilter             string
+	LdapServers                  []string
+	Basedn                       string
+	Port                         int
+	Security                     int
+	ForceSearchForSamAccountName bool
 }

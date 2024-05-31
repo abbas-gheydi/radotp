@@ -7,7 +7,7 @@ import (
 	"github.com/Abbas-gheydi/radotp/pkgs/rad"
 	"github.com/Abbas-gheydi/radotp/pkgs/storage"
 	"github.com/Abbas-gheydi/radotp/pkgs/web"
-	ldapAuth "github.com/korylprince/go-ad-auth/v3"
+	ldapAuth "github.com/abbas-gheydi/go-ad-auth/v3"
 )
 
 var Cfg Configurations
@@ -41,6 +41,7 @@ func LoadConfigs() {
 	rad.Auth_Provider.LdapConfig.Security = ldapAuth.SecurityType(Cfg.Ldap.Security)
 	rad.Auth_Provider.LdapConfig.Server = Cfg.Ldap.LdapServers[0]
 	rad.Auth_Provider.LdapServers = Cfg.Ldap.LdapServers
+	rad.Auth_Provider.LdapConfig.ForceSearchForSamAccountName = Cfg.Ldap.ForceSearchForSamAccountName
 
 	//database configs
 	storage.Dsn = fmt.Sprintf("host=%v user=%v password=%v dbname=%v port=%v sslmode=%v TimeZone=%v", Cfg.Database.Server, Cfg.Database.Username, Cfg.Database.Password, Cfg.Database.Dbname, Cfg.Database.Port, Cfg.Database.Sslmode, Cfg.Database.Timezone)
