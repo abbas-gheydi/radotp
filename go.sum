@@ -64,6 +64,8 @@ github.com/Masterminds/semver/v3 v3.1.1/go.mod h1:VPu/7SZ7ePZ3QOrcuXROw5FAcLl4a0
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
 github.com/abbas-gheydi/go-ad-auth/v3 v3.4.41 h1:5xm0QEIGGExRRR1UWHYlekmH3xlahcm4dsyODaQK5CM=
 github.com/abbas-gheydi/go-ad-auth/v3 v3.4.41/go.mod h1:hEFwR0rdKWT0OpQPGztCV+eFXdRoaUfKB2LM0Kd84bw=
+github.com/abbas-gheydi/go-ad-auth/v3 v3.4.42 h1:z+iF3mDKMhnm09hs92L5gsSZTpO55GenqkVRCSfGdM4=
+github.com/abbas-gheydi/go-ad-auth/v3 v3.4.42/go.mod h1:hEFwR0rdKWT0OpQPGztCV+eFXdRoaUfKB2LM0Kd84bw=
 github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=
 github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=
 github.com/alecthomas/units v0.0.0-20151022065526-2efee857e7cf/go.mod h1:ybxpYRFXyAe+OPACYpWeL0wqObRcbAqCMya13uyzqw0=

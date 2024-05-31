@@ -1,7 +1,7 @@
 # github.com/Azure/go-ntlmssp v0.0.0-20220621081337-cb9428e4ac1e
 ## explicit
 github.com/Azure/go-ntlmssp
-# github.com/abbas-gheydi/go-ad-auth/v3 v3.4.41
+# github.com/abbas-gheydi/go-ad-auth/v3 v3.4.42
 ## explicit; go 1.13
 github.com/abbas-gheydi/go-ad-auth/v3
 # github.com/beorn7/perks v1.0.1
@@ -77,7 +77,6 @@ github.com/jinzhu/inflection
 github.com/jinzhu/now
 # github.com/korylprince/go-ad-auth/v3 v3.2.0
 ## explicit; go 1.13
-github.com/korylprince/go-ad-auth/v3
 # github.com/magiconair/properties v1.8.6
 ## explicit; go 1.13
 github.com/magiconair/properties

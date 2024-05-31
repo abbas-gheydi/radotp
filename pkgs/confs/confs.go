@@ -72,4 +72,5 @@ type LdapProvider struct {
 	Port                         int
 	Security                     int
 	ForceSearchForSamAccountName bool
+	PreWin2kLogonNameDomain      string
 }

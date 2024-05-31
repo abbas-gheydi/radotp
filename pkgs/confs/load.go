@@ -42,6 +42,7 @@ func LoadConfigs() {
 	rad.Auth_Provider.LdapConfig.Server = Cfg.Ldap.LdapServers[0]
 	rad.Auth_Provider.LdapServers = Cfg.Ldap.LdapServers
 	rad.Auth_Provider.LdapConfig.ForceSearchForSamAccountName = Cfg.Ldap.ForceSearchForSamAccountName
+	rad.Auth_Provider.LdapConfig.PreWin2kLogonNameDomain = Cfg.Ldap.PreWin2kLogonNameDomain
 
 	//database configs
 	storage.Dsn = fmt.Sprintf("host=%v user=%v password=%v dbname=%v port=%v sslmode=%v TimeZone=%v", Cfg.Database.Server, Cfg.Database.Username, Cfg.Database.Password, Cfg.Database.Dbname, Cfg.Database.Port, Cfg.Database.Sslmode, Cfg.Database.Timezone)

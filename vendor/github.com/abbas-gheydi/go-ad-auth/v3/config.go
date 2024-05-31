@@ -28,6 +28,7 @@ type Config struct {
 	Security                     SecurityType
 	RootCAs                      *x509.CertPool
 	ForceSearchForSamAccountName bool
+	PreWin2kLogonNameDomain      string
 }
 
 // Domain returns the domain derived from BaseDN or an error if misconfigured.
@@ -72,6 +73,9 @@ func (c *Config) SamAccountName(username string) (fullUserName, user string, err
 		return "", "", errors.New("invalid domain format")
 	}
 	domain := domainParts[0]
+	if c.PreWin2kLogonNameDomain != "" {
+		domain = c.PreWin2kLogonNameDomain
+	}
 
 	// Construct the full user name using domain and username
 	fullUserName = domain + `\` + user
