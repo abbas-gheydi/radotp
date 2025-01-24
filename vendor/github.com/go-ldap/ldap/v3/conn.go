@@ -1,10 +1,10 @@
 package ldap
 
 import (
-	"bufio"
 	"crypto/tls"
 	"errors"
 	"fmt"
+	"log"
 	"net"
 	"net/url"
 	"sync"
@@ -87,7 +87,6 @@ const (
 type Conn struct {
 	// requestTimeout is loaded atomically
 	// so we need to ensure 64-bit alignment on 32-bit platforms.
-	// https://github.com/go-ldap/ldap/pull/199
 	requestTimeout      int64
 	conn                net.Conn
 	isTLS               bool
@@ -130,15 +129,6 @@ func DialWithTLSConfig(tc *tls.Config) DialOpt {
 	}
 }
 
-// DialWithTLSDialer is a wrapper for DialWithTLSConfig with the option to
-// specify a net.Dialer to for example define a timeout or a custom resolver.
-func DialWithTLSDialer(tlsConfig *tls.Config, dialer *net.Dialer) DialOpt {
-	return func(dc *DialContext) {
-		dc.tc = tlsConfig
-		dc.d = dialer
-	}
-}
-
 // DialContext contains necessary parameters to dial the given ldap URL.
 type DialContext struct {
 	d  *net.Dialer
@@ -155,7 +145,7 @@ func (dc *DialContext) dial(u *url.URL) (net.Conn, error) {
 
 	host, port, err := net.SplitHostPort(u.Host)
 	if err != nil {
-		// we assume that error is due to missing port
+		// we asume that error is due to missing port
 		host = u.Host
 		port = ""
 	}
@@ -272,7 +262,7 @@ func (l *Conn) Close() {
 
 		l.Debug.Printf("Closing network connection")
 		if err := l.conn.Close(); err != nil {
-			logger.Println(err)
+			log.Println(err)
 		}
 
 		l.wgClose.Done()
@@ -282,7 +272,9 @@ func (l *Conn) Close() {
 
 // SetTimeout sets the time after a request is sent that a MessageTimeout triggers
 func (l *Conn) SetTimeout(timeout time.Duration) {
-	atomic.StoreInt64(&l.requestTimeout, int64(timeout))
+	if timeout > 0 {
+		atomic.StoreInt64(&l.requestTimeout, int64(timeout))
+	}
 }
 
 // Returns the next available messageID
@@ -398,12 +390,7 @@ func (l *Conn) sendMessageWithFlags(packet *ber.Packet, flags sendMessageFlags) 
 			responses: responses,
 		},
 	}
-	if !l.sendProcessMessage(message) {
-		if l.IsClosing() {
-			return nil, NewError(ErrorNetwork, errors.New("ldap: connection closed"))
-		}
-		return nil, NewError(ErrorNetwork, errors.New("ldap: could not send message for unknown reason"))
-	}
+	l.sendProcessMessage(message)
 	return message.Context, nil
 }
 
@@ -441,7 +428,7 @@ func (l *Conn) sendProcessMessage(message *messagePacket) bool {
 func (l *Conn) processMessages() {
 	defer func() {
 		if err := recover(); err != nil {
-			logger.Printf("ldap: recovered panic in processMessages: %v", err)
+			log.Printf("ldap: recovered panic in processMessages: %v", err)
 		}
 		for messageID, msgCtx := range l.messageContexts {
 			// If we are closing due to an error, inform anyone who
@@ -485,26 +472,20 @@ func (l *Conn) processMessages() {
 				l.messageContexts[message.MessageID] = message.Context
 
 				// Add timeout if defined
-				if l.requestTimeout > 0 {
+				requestTimeout := time.Duration(atomic.LoadInt64(&l.requestTimeout))
+				if requestTimeout > 0 {
 					go func() {
-						timer := time.NewTimer(time.Duration(l.requestTimeout))
 						defer func() {
 							if err := recover(); err != nil {
-								logger.Printf("ldap: recovered panic in RequestTimeout: %v", err)
+								log.Printf("ldap: recovered panic in RequestTimeout: %v", err)
 							}
-
-							timer.Stop()
 						}()
-
-						select {
-						case <-timer.C:
-							timeoutMessage := &messagePacket{
-								Op:        MessageTimeout,
-								MessageID: message.MessageID,
-							}
-							l.sendProcessMessage(timeoutMessage)
-						case <-message.Context.done:
+						time.Sleep(requestTimeout)
+						timeoutMessage := &messagePacket{
+							Op:        MessageTimeout,
+							MessageID: message.MessageID,
 						}
+						l.sendProcessMessage(timeoutMessage)
 					}()
 				}
 			case MessageResponse:
@@ -512,7 +493,7 @@ func (l *Conn) processMessages() {
 				if msgCtx, ok := l.messageContexts[message.MessageID]; ok {
 					msgCtx.sendResponse(&PacketResponse{message.Packet, nil})
 				} else {
-					logger.Printf("Received unexpected message %d, %v", message.MessageID, l.IsClosing())
+					log.Printf("Received unexpected message %d, %v", message.MessageID, l.IsClosing())
 					l.Debug.PrintPacket(message.Packet)
 				}
 			case MessageTimeout:
@@ -520,7 +501,7 @@ func (l *Conn) processMessages() {
 				// All reads will return immediately
 				if msgCtx, ok := l.messageContexts[message.MessageID]; ok {
 					l.Debug.Printf("Receiving message timeout for %d", message.MessageID)
-					msgCtx.sendResponse(&PacketResponse{message.Packet, NewError(ErrorNetwork, errors.New("ldap: connection timed out"))})
+					msgCtx.sendResponse(&PacketResponse{message.Packet, errors.New("ldap: connection timed out")})
 					delete(l.messageContexts, message.MessageID)
 					close(msgCtx.responses)
 				}
@@ -539,20 +520,19 @@ func (l *Conn) reader() {
 	cleanstop := false
 	defer func() {
 		if err := recover(); err != nil {
-			logger.Printf("ldap: recovered panic in reader: %v", err)
+			log.Printf("ldap: recovered panic in reader: %v", err)
 		}
 		if !cleanstop {
 			l.Close()
 		}
 	}()
 
-	bufConn := bufio.NewReader(l.conn)
 	for {
 		if cleanstop {
 			l.Debug.Printf("reader clean stopping (without closing the connection)")
 			return
 		}
-		packet, err := ber.ReadPacket(bufConn)
+		packet, err := ber.ReadPacket(l.conn)
 		if err != nil {
 			// A read error is expected here if we are closing the connection...
 			if !l.IsClosing() {

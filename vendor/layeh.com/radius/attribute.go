@@ -139,7 +139,7 @@ func NewIFID(addr net.HardwareAddr) (Attribute, error) {
 // attribute length is invalid, the secret is empty, or the requestAuthenticator
 // length is invalid.
 func UserPassword(a Attribute, secret, requestAuthenticator []byte) ([]byte, error) {
-	if len(a) < 16 || len(a) > 128 {
+	if len(a) < 16 || len(a) > 128 || len(a)%16 != 0 {
 		return nil, errors.New("invalid attribute length (" + strconv.Itoa(len(a)) + ")")
 	}
 	if len(secret) == 0 {
@@ -204,8 +204,8 @@ func NewUserPassword(plaintext, secret, requestAuthenticator []byte) (Attribute,
 	hash.Write(requestAuthenticator)
 	enc = hash.Sum(enc)
 
-	for i, b := range plaintext[:16] {
-		enc[i] ^= b
+	for i := 0; i < 16 && i < len(plaintext); i++ {
+		enc[i] ^= plaintext[i]
 	}
 
 	for i := 16; i < len(plaintext); i += 16 {
@@ -214,8 +214,8 @@ func NewUserPassword(plaintext, secret, requestAuthenticator []byte) (Attribute,
 		hash.Write(enc[i-16 : i])
 		enc = hash.Sum(enc)
 
-		for j, b := range plaintext[i : i+16] {
-			enc[i+j] ^= b
+		for j := 0; j < 16 && i+j < len(plaintext); j++ {
+			enc[i+j] ^= plaintext[i+j]
 		}
 	}
 
@@ -467,18 +467,21 @@ func IPv6Prefix(a Attribute) (*net.IPNet, error) {
 	}
 
 	prefixLength := int(a[1])
-	if (len(a)-2)*8 < prefixLength {
+	if prefixLength > net.IPv6len*8 {
 		return nil, errors.New("invalid prefix length")
 	}
 
 	ip := make(net.IP, net.IPv6len)
 	copy(ip, a[2:])
 
-	// clear final non-mask bits
-	if i := uint(prefixLength % 8); i != 0 {
-		for ; i < 8; i++ {
-			ip[prefixLength/8] &^= 1 << (7 - i)
+	bit := uint(prefixLength % 8)
+	for octet := prefixLength / 8; octet < len(ip); octet++ {
+		for ; bit < 8; bit++ {
+			if ip[octet]&(1<<(7-bit)) != 0 {
+				return nil, errors.New("invalid prefix data")
+			}
 		}
+		bit = 0
 	}
 
 	return &net.IPNet{

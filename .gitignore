@@ -1,3 +1,4 @@
 .VSCodeCounter
 .vscode
 __debug_bin
+cmd/server/radiusd.conf

@@ -1,6 +1,8 @@
 package ldap
 
 import (
+	"log"
+
 	ber "github.com/go-asn1-ber/asn1-ber"
 )
 
@@ -51,7 +53,7 @@ func (l *Conn) Del(delRequest *DelRequest) error {
 			return err
 		}
 	} else {
-		logger.Printf("Unexpected Response: %d", packet.Children[1].Tag)
+		log.Printf("Unexpected Response: %d", packet.Children[1].Tag)
 	}
 	return nil
 }
