@@ -14,16 +14,16 @@ import (
 var db_web *gorm.DB
 var once_web sync.Once
 
-type postgresWebAdmin struct{}
-
-type webadmin struct {
+type radotpWebAdmin struct {
 	Uname    string
 	Role     string
 	Password string
 }
 
+type postgresWebAdmin struct{}
+
 func (p postgresWebAdmin) GetAdminPassword(uname string) (password string) {
-	var resualt webadmin
+	var resualt radotpWebAdmin
 
 	db_web.First(&resualt, "Uname = ?", uname)
 	return resualt.Password
@@ -32,7 +32,7 @@ func (p postgresWebAdmin) GetAdminPassword(uname string) (password string) {
 
 func (p postgresWebAdmin) SetAdminPassword(password string) {
 	hash_password := ShaGenerator(password)
-	tx := db_web.Model(&webadmin{}).Where("uname = ?", "admin").Update("password", hash_password)
+	tx := db_web.Model(&radotpWebAdmin{}).Where("uname = ?", "admin").Update("password", hash_password)
 	if tx.Error != nil {
 		log.Println("*****db.go", tx.Error)
 	} else {
@@ -41,7 +41,7 @@ func (p postgresWebAdmin) SetAdminPassword(password string) {
 	if tx.RowsAffected != 1 {
 		//create admin user with default password
 		tx.AddError(errors.New("user not found "))
-		db_web.Create(&webadmin{Uname: "admin", Role: "admin", Password: hash_password})
+		db_web.Create(&radotpWebAdmin{Uname: "admin", Role: "admin", Password: hash_password})
 		log.Print(" create admin/admin username for web access")
 
 	}
@@ -51,7 +51,7 @@ func (p postgresWebAdmin) SetAdminPassword(password string) {
 func (p postgresWebAdmin) Migrate() {
 
 	db_web := p.Connection()
-	db_web.AutoMigrate(&webadmin{})
+	db_web.AutoMigrate(&radotpWebAdmin{})
 	if p.GetAdminPassword("admin") == "" {
 		p.SetAdminPassword("admin")
 
