@@ -14,10 +14,10 @@ import (
 )
 
 const (
-	user_has_otp_code          string = "user has otp code"
-	user_not_found             string = storage.User_not_found
-	already_exists             string = "already exists"
-	disabled_OTP_Code_for_User string = "Disabled OTP Code for User"
+	UserHasOtpCode         string = "user has otp code"
+	UserNotFound           string = storage.User_not_found
+	AlreadyExists          string = "already exists"
+	DisabledOtpCodeForUser string = "Disabled OTP Code for User"
 )
 
 var (
@@ -39,33 +39,29 @@ type userCode struct {
 	Result   string
 }
 
+// authHandler is a custom handler for authentication checks
 type authHandler struct {
-	//next http.Handler
 	next func(w http.ResponseWriter, r *http.Request)
 }
 
+// ServeHTTP handles the authentication for each request
 func (h *authHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	token, readCookieError := r.Cookie("auth")
-
-	if readCookieError == nil && isCookieValied(token.Value) {
-		//authenticatin is successful
+	token, err := r.Cookie("auth")
+	if err == nil && isCookieValid(token.Value) {
+		// Proceed to next handler if authentication is successful
 		h.next(w, r)
-
 	} else {
-
-		//log.Println("read cookie error", readCookieError)
-
+		// Redirect to login if not authenticated
 		http.Redirect(w, r, "/login/", http.StatusFound)
-
 	}
-
 }
 
+// MustAuth returns an authHandler to wrap around routes requiring authentication
 func MustAuth(handler func(w http.ResponseWriter, r *http.Request)) *authHandler {
-
 	return &authHandler{next: handler}
 }
 
+// templateHandler handles the loading and rendering of templates
 type templateHandler struct {
 	once     sync.Once
 	filename string
@@ -73,14 +69,18 @@ type templateHandler struct {
 	options  interface{}
 }
 
+// ServeHTTP renders the template and serves the response
 func (t *templateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	t.once.Do(func() {
+		// Parse the template only once
 		t.templ = template.Must(template.ParseFS(templates, "templates/"+t.filename))
 	})
+	// Execute the template with options passed to it
 	t.templ.Execute(w, t.options)
 }
 
-func createuser(user *userCode) {
+// createUser creates a new OTP user and stores it
+func createUser(user *userCode) {
 	user.Code, user.Qr = authentiate.NewOtpUser(user.UserName, QrIssuer)
 	user.Err = storage.Set(user.UserName, user.Code)
 
@@ -88,14 +88,14 @@ func createuser(user *userCode) {
 		user.Code = ""
 		user.Qr = ""
 		if strings.Contains(user.Err.Error(), "duplicate key value violates unique constraint \"otps_username_key\"") {
-			user.Err = fmt.Errorf(already_exists)
+			user.Err = fmt.Errorf(AlreadyExists)
 		}
-
 		log.Println("createUser", user.Err)
 	}
 }
 
-func updateuser(user *userCode) {
+// updateUser updates an existing OTP user
+func updateUser(user *userCode) {
 	user.Code, user.Qr = authentiate.NewOtpUser(user.UserName, QrIssuer)
 	user.Err = storage.Update(user.UserName, user.Code)
 	if user.Err != nil {
@@ -105,63 +105,64 @@ func updateuser(user *userCode) {
 	}
 }
 
-func deleteuser(user *userCode) {
+// deleteUser deletes the OTP code for a user
+func deleteUser(user *userCode) {
 	user.Err = storage.Delete(user.UserName)
 	if user.Err != nil {
 		log.Println("deleteUser", user.Err)
 	} else {
-		user.Result = disabled_OTP_Code_for_User
+		user.Result = DisabledOtpCodeForUser
 	}
 }
-func searchuser(user *userCode) {
-	SearchResualt, getErr := storage.Get(user.UserName)
-	if SearchResualt == "" || getErr != nil {
+
+// searchUser searches for an OTP code for a user
+func searchUser(user *userCode) {
+	searchResult, getErr := storage.Get(user.UserName)
+	if searchResult == "" || getErr != nil {
 		log.Println("searchUser error", getErr)
-		user.Result = user_not_found
+		user.Result = UserNotFound
 		if !strings.Contains(getErr.Error(), "record not found") {
 			user.Err = getErr
-
 		}
-
 	} else {
-		user.Result = user_has_otp_code
+		user.Result = UserHasOtpCode
 	}
 }
 
+// manageUsers handles user management actions (create, update, delete, search)
 func manageUsers(w http.ResponseWriter, r *http.Request) {
 	templ := templateHandler{filename: "index.gohtml"}
 	var opts userCode
 	opts.UserName = r.FormValue("username")
 
 	if r.Method == http.MethodPost {
-
+		// Determine action based on form submission
 		switch r.FormValue("tasks") {
 		case "createuser":
-			createuser(&opts)
-
+			createUser(&opts)
 		case "updateuser":
-			updateuser(&opts)
+			updateUser(&opts)
 		case "deleteuser":
-			deleteuser(&opts)
+			deleteUser(&opts)
 		case "searchuser":
-			searchuser(&opts)
+			searchUser(&opts)
 		}
-
 		templ.options = opts
-
 	}
 
+	// Render the template
 	templ.ServeHTTP(w, r)
-
 }
 
+// serveAssets handles requests for static assets
 func serveAssets(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Ensure no directory listing
 		if strings.HasSuffix(r.URL.Path, "/") {
 			http.NotFound(w, r)
 			return
 		}
-
+		// Serve the static asset
 		next.ServeHTTP(w, r)
 	})
 }

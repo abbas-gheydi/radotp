@@ -17,7 +17,7 @@ func editAdminUser(w http.ResponseWriter, r *http.Request) {
 		if CheckWebAdminPass("admin", currenPassword) && newPassword != "" {
 			storage.SetAdminPassword(newPassword)
 			log.Println("webadmin password updated")
-			setExpiredCookie(w, "user")
+			setExpiredCookie(w)
 			http.Redirect(w, r, "/", http.StatusFound)
 		}
 	}

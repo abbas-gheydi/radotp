@@ -1,7 +1,6 @@
 package confs
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/Abbas-gheydi/radotp/pkgs/rad"
@@ -28,7 +27,9 @@ func (c *Configurations) Load() {
 	viper.AddConfigPath(".")
 	err := viper.ReadInConfig()
 	if err != nil {
-		panic(fmt.Errorf("fatal error config file: %w ", err))
+		// panic(fmt.Errorf("fatal error config file: %w ", err))
+		// Detailed error message
+		log.Fatalf("fatal error config file: %s ", err.Error())
 	}
 
 	err = viper.Unmarshal(&c)

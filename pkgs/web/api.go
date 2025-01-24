@@ -27,20 +27,20 @@ func apiActionsfunc(w http.ResponseWriter, r *http.Request, action apiActions, o
 }
 
 func apiGetUser(w http.ResponseWriter, r *http.Request) {
-	apiActionsfunc(w, r, searchuser, http.StatusOK)
+	apiActionsfunc(w, r, searchUser, http.StatusOK)
 }
 
 func apiCreateUser(w http.ResponseWriter, r *http.Request) {
-	apiActionsfunc(w, r, createuser, http.StatusCreated)
+	apiActionsfunc(w, r, createUser, http.StatusCreated)
 
 }
 
 func apiDeleteUser(w http.ResponseWriter, r *http.Request) {
-	apiActionsfunc(w, r, deleteuser, http.StatusOK)
+	apiActionsfunc(w, r, deleteUser, http.StatusOK)
 }
 
 func apiUpdateUser(w http.ResponseWriter, r *http.Request) {
-	apiActionsfunc(w, r, updateuser, http.StatusCreated)
+	apiActionsfunc(w, r, updateUser, http.StatusCreated)
 }
 
 func getUserNameParamFromUrl(r *http.Request) userCode {
@@ -71,16 +71,16 @@ func createUserResponseHandler(user *userCode, okResponseCode int) (respCode int
 		user.Result = "ok"
 		respCode = okResponseCode
 
-	case user_has_otp_code:
+	case UserHasOtpCode:
 		respCode = okResponseCode
 
-	case user_not_found:
+	case UserNotFound:
 		respCode = http.StatusNotFound
 
-	case disabled_OTP_Code_for_User:
+	case DisabledOtpCodeForUser:
 		respCode = okResponseCode
 
-	case already_exists:
+	case AlreadyExists:
 		respCode = http.StatusMethodNotAllowed
 
 	default:
