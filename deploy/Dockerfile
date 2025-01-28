@@ -1,5 +1,5 @@
 
-FROM golang:1.20-bullseye AS build
+FROM golang:1.23-bullseye AS build
 
 WORKDIR /
 
@@ -9,7 +9,7 @@ RUN ls -la
 
 RUN go mod download && go build -o /radotp ./cmd/server/main.go 
 
-FROM ubuntu:20.04 as radotp
+FROM ubuntu:20.04 AS radotp
 
 LABEL maintainer="Abbas Gheydi <abbas.gheydi@gmail.com>"
 
