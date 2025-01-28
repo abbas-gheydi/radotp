@@ -1,5 +1,5 @@
 
-FROM ubuntu:20.04 as radotp
+FROM ubuntu:20.04 AS radotp
 
 LABEL maintainer="Abbas Gheydi <abbas.gheydi@gmail.com>"
 

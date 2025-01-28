@@ -1,6 +1,6 @@
 module github.com/Abbas-gheydi/radotp
 
-go 1.23.1
+go 1.23
 
 require (
 	github.com/abbas-gheydi/go-ad-auth/v3 v3.4.42
