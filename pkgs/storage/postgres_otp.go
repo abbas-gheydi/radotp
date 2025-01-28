@@ -26,7 +26,7 @@ var (
 	once   sync.Once
 )
 
-type otps struct {
+type radotpOtps struct {
 	ID       uint   `gorm:"primarykey"`
 	Username string `gorm:"index:idx_users,type:hash;unique"`
 	Secret   string
@@ -46,7 +46,7 @@ func (p postgresOtp) Set(username string, secret string) error {
 
 	}
 
-	otpUser := otps{
+	otpUser := radotpOtps{
 		Username: username,
 		Secret:   aesEncrypt(secret, generateEncKey(username)),
 	}
@@ -63,7 +63,7 @@ func (p postgresOtp) Set(username string, secret string) error {
 func (p postgresOtp) Update(username string, secret string) error {
 	username = strings.ToLower(username)
 
-	otpUser := otps{
+	otpUser := radotpOtps{
 		Username: username,
 		Secret:   aesEncrypt(secret, generateEncKey(username)),
 	}
@@ -86,7 +86,7 @@ func (p postgresOtp) Update(username string, secret string) error {
 func (p postgresOtp) Delete(username string) error {
 	username = strings.ToLower(username)
 
-	otpUser := otps{Username: username}
+	otpUser := radotpOtps{Username: username}
 	tx := db_otp.Model(&otpUser).Where("username = ?", username).Delete(otpUser)
 	if tx.Error != nil {
 		log.Println("*****db.go", tx.Error)
@@ -107,7 +107,7 @@ func (p postgresOtp) Get(username string) (password string, err error) {
 	if strings.Contains(username, winNTSplitChar) && strings.Split(username, winNTSplitChar)[1] != "" {
 		username = strings.Split(username, winNTSplitChar)[1]
 	}
-	otpUser := otps{Username: username}
+	otpUser := radotpOtps{Username: username}
 
 	tx := db_otp.First(&otpUser, "Username = ?", username)
 	if tx.Error != nil && strings.Contains(tx.Error.Error(), "record not found") {
@@ -152,6 +152,6 @@ func (p postgresOtp) Connect() *gorm.DB {
 
 func (p postgresOtp) Migrate() {
 	db := p.Connect()
-	db.AutoMigrate(&otps{})
+	db.AutoMigrate(&radotpOtps{})
 
 }

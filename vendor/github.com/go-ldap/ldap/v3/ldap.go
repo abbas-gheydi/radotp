@@ -3,7 +3,6 @@ package ldap
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 
 	ber "github.com/go-asn1-ber/asn1-ber"
@@ -81,13 +80,6 @@ var BeheraPasswordPolicyErrorMap = map[int8]string{
 	BeheraPasswordTooShort:            "Password is too short for policy",
 	BeheraPasswordTooYoung:            "Password has been changed too recently",
 	BeheraPasswordInHistory:           "New password is in list of old passwords",
-}
-
-var logger = log.New(os.Stderr, "", log.LstdFlags)
-
-// Logger allows clients to override the default logger
-func Logger(l *log.Logger) {
-	logger = l
 }
 
 // Adds descriptions to an LDAP Response packet for debugging
@@ -229,28 +221,34 @@ func addControlDescriptions(packet *ber.Packet) error {
 			sequence := value.Children[0]
 			for _, child := range sequence.Children {
 				if child.Tag == 0 {
-					// Warning
+					//Warning
 					warningPacket := child.Children[0]
-					val, err := ber.ParseInt64(warningPacket.Data.Bytes())
+					packet, err := ber.DecodePacketErr(warningPacket.Data.Bytes())
 					if err != nil {
 						return fmt.Errorf("failed to decode data bytes: %s", err)
 					}
-					if warningPacket.Tag == 0 {
-						// timeBeforeExpiration
-						value.Description += " (TimeBeforeExpiration)"
-						warningPacket.Value = val
-					} else if warningPacket.Tag == 1 {
-						// graceAuthNsRemaining
-						value.Description += " (GraceAuthNsRemaining)"
-						warningPacket.Value = val
+					val, ok := packet.Value.(int64)
+					if ok {
+						if warningPacket.Tag == 0 {
+							//timeBeforeExpiration
+							value.Description += " (TimeBeforeExpiration)"
+							warningPacket.Value = val
+						} else if warningPacket.Tag == 1 {
+							//graceAuthNsRemaining
+							value.Description += " (GraceAuthNsRemaining)"
+							warningPacket.Value = val
+						}
 					}
 				} else if child.Tag == 1 {
 					// Error
-					bs := child.Data.Bytes()
-					if len(bs) != 1 || bs[0] > 8 {
-						return fmt.Errorf("failed to decode data bytes: %s", "invalid PasswordPolicyResponse enum value")
+					packet, err := ber.DecodePacketErr(child.Data.Bytes())
+					if err != nil {
+						return fmt.Errorf("failed to decode data bytes: %s", err)
 					}
-					val := int8(bs[0])
+					val, ok := packet.Value.(int8)
+					if !ok {
+						val = -1
+					}
 					child.Description = "Error"
 					child.Value = val
 				}

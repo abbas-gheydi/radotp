@@ -3,9 +3,7 @@ package ldap
 import (
 	"errors"
 	"fmt"
-	"reflect"
 	"sort"
-	"strconv"
 	"strings"
 
 	ber "github.com/go-asn1-ber/asn1-ber"
@@ -79,31 +77,10 @@ func (e *Entry) GetAttributeValues(attribute string) []string {
 	return []string{}
 }
 
-// GetEqualFoldAttributeValues returns the values for the named attribute, or an
-// empty list. Attribute matching is done with strings.EqualFold.
-func (e *Entry) GetEqualFoldAttributeValues(attribute string) []string {
-	for _, attr := range e.Attributes {
-		if strings.EqualFold(attribute, attr.Name) {
-			return attr.Values
-		}
-	}
-	return []string{}
-}
-
 // GetRawAttributeValues returns the byte values for the named attribute, or an empty list
 func (e *Entry) GetRawAttributeValues(attribute string) [][]byte {
 	for _, attr := range e.Attributes {
 		if attr.Name == attribute {
-			return attr.ByteValues
-		}
-	}
-	return [][]byte{}
-}
-
-// GetEqualFoldRawAttributeValues returns the byte values for the named attribute, or an empty list
-func (e *Entry) GetEqualFoldRawAttributeValues(attribute string) [][]byte {
-	for _, attr := range e.Attributes {
-		if strings.EqualFold(attr.Name, attribute) {
 			return attr.ByteValues
 		}
 	}
@@ -119,28 +96,9 @@ func (e *Entry) GetAttributeValue(attribute string) string {
 	return values[0]
 }
 
-// GetEqualFoldAttributeValue returns the first value for the named attribute, or "".
-// Attribute comparison is done with strings.EqualFold.
-func (e *Entry) GetEqualFoldAttributeValue(attribute string) string {
-	values := e.GetEqualFoldAttributeValues(attribute)
-	if len(values) == 0 {
-		return ""
-	}
-	return values[0]
-}
-
 // GetRawAttributeValue returns the first value for the named attribute, or an empty slice
 func (e *Entry) GetRawAttributeValue(attribute string) []byte {
 	values := e.GetRawAttributeValues(attribute)
-	if len(values) == 0 {
-		return []byte{}
-	}
-	return values[0]
-}
-
-// GetEqualFoldRawAttributeValue returns the first value for the named attribute, or an empty slice
-func (e *Entry) GetEqualFoldRawAttributeValue(attribute string) []byte {
-	values := e.GetEqualFoldRawAttributeValues(attribute)
 	if len(values) == 0 {
 		return []byte{}
 	}
@@ -161,124 +119,6 @@ func (e *Entry) PrettyPrint(indent int) {
 	for _, attr := range e.Attributes {
 		attr.PrettyPrint(indent + 2)
 	}
-}
-
-// Describe the tag to use for struct field tags
-const decoderTagName = "ldap"
-
-// readTag will read the reflect.StructField value for
-// the key defined in decoderTagName. If omitempty is
-// specified, the field may not be filled.
-func readTag(f reflect.StructField) (string, bool) {
-	val, ok := f.Tag.Lookup(decoderTagName)
-	if !ok {
-		return f.Name, false
-	}
-	opts := strings.Split(val, ",")
-	omit := false
-	if len(opts) == 2 {
-		omit = opts[1] == "omitempty"
-	}
-	return opts[0], omit
-}
-
-// Unmarshal parses the Entry in the value pointed to by i
-//
-// Currently, this methods only supports struct fields of type
-// string, []string, int, int64 or []byte. Other field types will not be
-// regarded. If the field type is a string or int but multiple attribute
-// values are returned, the first value will be used to fill the field.
-//
-// Example:
-//	type UserEntry struct {
-//		// Fields with the tag key `dn` are automatically filled with the
-//		// objects distinguishedName. This can be used multiple times.
-//		DN string `ldap:"dn"`
-//
-//		// This field will be filled with the attribute value for
-//		// userPrincipalName. An attribute can be read into a struct field
-//		// multiple times. Missing attributes will not result in an error.
-//		UserPrincipalName string `ldap:"userPrincipalName"`
-//
-//		// memberOf may have multiple values. If you don't
-//		// know the amount of attribute values at runtime, use a string array.
-//		MemberOf []string `ldap:"memberOf"`
-//
-//		// ID is an integer value, it will fail unmarshaling when the given
-//		// attribute value cannot be parsed into an integer.
-//		ID int `ldap:"id"`
-//
-//		// LongID is similar to ID but uses an int64 instead.
-//		LongID int64 `ldap:"longId"`
-//
-//		// Data is similar to MemberOf a slice containing all attribute
-//		// values.
-//		Data []byte `ldap:"data"`
-//
-//		// This won't work, as the field is not of type string. For this
-//		// to work, you'll have to temporarily store the result in string
-// 		// (or string array) and convert it to the desired type afterwards.
-//		UserAccountControl uint32 `ldap:"userPrincipalName"`
-//	}
-//	user := UserEntry{}
-//	if err := result.Unmarshal(&user); err != nil {
-//		// ...
-//	}
-func (e *Entry) Unmarshal(i interface{}) (err error) {
-	// Make sure it's a ptr
-	if vo := reflect.ValueOf(i).Kind(); vo != reflect.Ptr {
-		return fmt.Errorf("ldap: cannot use %s, expected pointer to a struct", vo)
-	}
-
-	sv, st := reflect.ValueOf(i).Elem(), reflect.TypeOf(i).Elem()
-	// Make sure it's pointing to a struct
-	if sv.Kind() != reflect.Struct {
-		return fmt.Errorf("ldap: expected pointer to a struct, got %s", sv.Kind())
-	}
-
-	for n := 0; n < st.NumField(); n++ {
-		// Holds struct field value and type
-		fv, ft := sv.Field(n), st.Field(n)
-
-		// skip unexported fields
-		if ft.PkgPath != "" {
-			continue
-		}
-
-		// omitempty can be safely discarded, as it's not needed when unmarshalling
-		fieldTag, _ := readTag(ft)
-
-		// Fill the field with the distinguishedName if the tag key is `dn`
-		if fieldTag == "dn" {
-			fv.SetString(e.DN)
-			continue
-		}
-
-		values := e.GetAttributeValues(fieldTag)
-		if len(values) == 0 {
-			continue
-		}
-
-		switch fv.Interface().(type) {
-		case []string:
-			for _, item := range values {
-				fv.Set(reflect.Append(fv, reflect.ValueOf(item)))
-			}
-		case string:
-			fv.SetString(values[0])
-		case []byte:
-			fv.SetBytes([]byte(values[0]))
-		case int, int64:
-			intVal, err := strconv.ParseInt(values[0], 10, 64)
-			if err != nil {
-				return fmt.Errorf("ldap: could not parse value '%s' into int field", values[0])
-			}
-			fv.SetInt(intVal)
-		default:
-			return fmt.Errorf("ldap: expected field to be of type string, []string, int, int64 or []byte, got %v", ft.Type)
-		}
-	}
-	return
 }
 
 // NewEntryAttribute returns a new EntryAttribute with the desired key-value pair
@@ -439,9 +279,15 @@ func (l *Conn) SearchWithPaging(searchRequest *SearchRequest, pagingSize uint32)
 			return searchResult, NewError(ErrorNetwork, errors.New("ldap: packet not received"))
 		}
 
-		searchResult.Entries = append(searchResult.Entries, result.Entries...)
-		searchResult.Referrals = append(searchResult.Referrals, result.Referrals...)
-		searchResult.Controls = append(searchResult.Controls, result.Controls...)
+		for _, entry := range result.Entries {
+			searchResult.Entries = append(searchResult.Entries, entry)
+		}
+		for _, referral := range result.Referrals {
+			searchResult.Referrals = append(searchResult.Referrals, referral)
+		}
+		for _, control := range result.Controls {
+			searchResult.Controls = append(searchResult.Controls, control)
+		}
 
 		l.Debug.Printf("Looking for Paging Control...")
 		pagingResult := FindControl(result.Controls, ControlTypePaging)
@@ -463,9 +309,7 @@ func (l *Conn) SearchWithPaging(searchRequest *SearchRequest, pagingSize uint32)
 	if pagingControl != nil {
 		l.Debug.Printf("Abandoning Paging...")
 		pagingControl.PagingSize = 0
-		if _, err := l.Search(searchRequest); err != nil {
-			return searchResult, err
-		}
+		l.Search(searchRequest)
 	}
 
 	return searchResult, nil
@@ -482,32 +326,38 @@ func (l *Conn) Search(searchRequest *SearchRequest) (*SearchResult, error) {
 	result := &SearchResult{
 		Entries:   make([]*Entry, 0),
 		Referrals: make([]string, 0),
-		Controls:  make([]Control, 0),
-	}
+		Controls:  make([]Control, 0)}
 
 	for {
 		packet, err := l.readPacket(msgCtx)
 		if err != nil {
-			return result, err
+			return nil, err
 		}
 
 		switch packet.Children[1].Tag {
 		case 4:
-			entry := &Entry{
-				DN:         packet.Children[1].Children[0].Value.(string),
-				Attributes: unpackAttributes(packet.Children[1].Children[1].Children),
+			entry := new(Entry)
+			entry.DN = packet.Children[1].Children[0].Value.(string)
+			for _, child := range packet.Children[1].Children[1].Children {
+				attr := new(EntryAttribute)
+				attr.Name = child.Children[0].Value.(string)
+				for _, value := range child.Children[1].Children {
+					attr.Values = append(attr.Values, value.Value.(string))
+					attr.ByteValues = append(attr.ByteValues, value.ByteValue)
+				}
+				entry.Attributes = append(entry.Attributes, attr)
 			}
 			result.Entries = append(result.Entries, entry)
 		case 5:
 			err := GetLDAPError(packet)
 			if err != nil {
-				return result, err
+				return nil, err
 			}
 			if len(packet.Children) == 3 {
 				for _, child := range packet.Children[2].Children {
 					decodedChild, err := DecodeControl(child)
 					if err != nil {
-						return result, fmt.Errorf("failed to decode child control: %s", err)
+						return nil, fmt.Errorf("failed to decode child control: %s", err)
 					}
 					result.Controls = append(result.Controls, decodedChild)
 				}
@@ -517,28 +367,4 @@ func (l *Conn) Search(searchRequest *SearchRequest) (*SearchResult, error) {
 			result.Referrals = append(result.Referrals, packet.Children[1].Children[0].Value.(string))
 		}
 	}
-}
-
-// unpackAttributes will extract all given LDAP attributes and it's values
-// from the ber.Packet
-func unpackAttributes(children []*ber.Packet) []*EntryAttribute {
-	entries := make([]*EntryAttribute, len(children))
-	for i, child := range children {
-		length := len(child.Children[1].Children)
-		entry := &EntryAttribute{
-			Name: child.Children[0].Value.(string),
-			// pre-allocate the slice since we can determine
-			// the number of attributes at this point
-			Values:     make([]string, length),
-			ByteValues: make([][]byte, length),
-		}
-
-		for i, value := range child.Children[1].Children {
-			entry.ByteValues[i] = value.ByteValue
-			entry.Values[i] = value.Value.(string)
-		}
-		entries[i] = entry
-	}
-
-	return entries
 }

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
-	ber "github.com/go-asn1-ber/asn1-ber"
+	"github.com/go-asn1-ber/asn1-ber"
 )
 
 const (
@@ -18,28 +18,20 @@ const (
 	ControlTypeVChuPasswordWarning = "2.16.840.1.113730.3.4.5"
 	// ControlTypeManageDsaIT - https://tools.ietf.org/html/rfc3296
 	ControlTypeManageDsaIT = "2.16.840.1.113730.3.4.2"
-	// ControlTypeWhoAmI - https://tools.ietf.org/html/rfc4532
-	ControlTypeWhoAmI = "1.3.6.1.4.1.4203.1.11.3"
-	// ControlTypeSubTreeDelete - https://datatracker.ietf.org/doc/html/draft-armijo-ldap-treedelete-02
-	ControlTypeSubtreeDelete = "1.2.840.113556.1.4.805"
 
 	// ControlTypeMicrosoftNotification - https://msdn.microsoft.com/en-us/library/aa366983(v=vs.85).aspx
 	ControlTypeMicrosoftNotification = "1.2.840.113556.1.4.528"
 	// ControlTypeMicrosoftShowDeleted - https://msdn.microsoft.com/en-us/library/aa366989(v=vs.85).aspx
 	ControlTypeMicrosoftShowDeleted = "1.2.840.113556.1.4.417"
-	// ControlTypeMicrosoftServerLinkTTL - https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/f4f523a8-abc0-4b3a-a471-6b2fef135481?redirectedfrom=MSDN
-	ControlTypeMicrosoftServerLinkTTL = "1.2.840.113556.1.4.2309"
 )
 
 // ControlTypeMap maps controls to text descriptions
 var ControlTypeMap = map[string]string{
-	ControlTypePaging:                 "Paging",
-	ControlTypeBeheraPasswordPolicy:   "Password Policy - Behera Draft",
-	ControlTypeManageDsaIT:            "Manage DSA IT",
-	ControlTypeSubtreeDelete:          "Subtree Delete Control",
-	ControlTypeMicrosoftNotification:  "Change Notification - Microsoft",
-	ControlTypeMicrosoftShowDeleted:   "Show Deleted Objects - Microsoft",
-	ControlTypeMicrosoftServerLinkTTL: "Return TTL-DNs for link values with associated expiry times - Microsoft",
+	ControlTypePaging:                "Paging",
+	ControlTypeBeheraPasswordPolicy:  "Password Policy - Behera Draft",
+	ControlTypeManageDsaIT:           "Manage DSA IT",
+	ControlTypeMicrosoftNotification: "Change Notification - Microsoft",
+	ControlTypeMicrosoftShowDeleted:  "Show Deleted Objects - Microsoft",
 }
 
 // Control defines an interface controls provide to encode and describe themselves
@@ -313,35 +305,6 @@ func NewControlMicrosoftShowDeleted() *ControlMicrosoftShowDeleted {
 	return &ControlMicrosoftShowDeleted{}
 }
 
-// ControlMicrosoftServerLinkTTL implements the control described in https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/f4f523a8-abc0-4b3a-a471-6b2fef135481?redirectedfrom=MSDN
-type ControlMicrosoftServerLinkTTL struct{}
-
-// GetControlType returns the OID
-func (c *ControlMicrosoftServerLinkTTL) GetControlType() string {
-	return ControlTypeMicrosoftServerLinkTTL
-}
-
-// Encode returns the ber packet representation
-func (c *ControlMicrosoftServerLinkTTL) Encode() *ber.Packet {
-	packet := ber.Encode(ber.ClassUniversal, ber.TypeConstructed, ber.TagSequence, nil, "Control")
-	packet.AppendChild(ber.NewString(ber.ClassUniversal, ber.TypePrimitive, ber.TagOctetString, ControlTypeMicrosoftServerLinkTTL, "Control Type ("+ControlTypeMap[ControlTypeMicrosoftServerLinkTTL]+")"))
-
-	return packet
-}
-
-// String returns a human-readable description
-func (c *ControlMicrosoftServerLinkTTL) String() string {
-	return fmt.Sprintf(
-		"Control Type: %s (%q)",
-		ControlTypeMap[ControlTypeMicrosoftServerLinkTTL],
-		ControlTypeMicrosoftServerLinkTTL)
-}
-
-// NewControlMicrosoftServerLinkTTL returns a ControlMicrosoftServerLinkTTL control
-func NewControlMicrosoftServerLinkTTL() *ControlMicrosoftServerLinkTTL {
-	return &ControlMicrosoftServerLinkTTL{}
-}
-
 // FindControl returns the first control of the given type in the list, or nil
 func FindControl(controls []Control, controlType string) Control {
 	for _, c := range controls {
@@ -441,26 +404,33 @@ func DecodeControl(packet *ber.Packet) (Control, error) {
 			if child.Tag == 0 {
 				//Warning
 				warningPacket := child.Children[0]
-				val, err := ber.ParseInt64(warningPacket.Data.Bytes())
+				packet, err := ber.DecodePacketErr(warningPacket.Data.Bytes())
 				if err != nil {
 					return nil, fmt.Errorf("failed to decode data bytes: %s", err)
 				}
-				if warningPacket.Tag == 0 {
-					//timeBeforeExpiration
-					c.Expire = val
-					warningPacket.Value = c.Expire
-				} else if warningPacket.Tag == 1 {
-					//graceAuthNsRemaining
-					c.Grace = val
-					warningPacket.Value = c.Grace
+				val, ok := packet.Value.(int64)
+				if ok {
+					if warningPacket.Tag == 0 {
+						//timeBeforeExpiration
+						c.Expire = val
+						warningPacket.Value = c.Expire
+					} else if warningPacket.Tag == 1 {
+						//graceAuthNsRemaining
+						c.Grace = val
+						warningPacket.Value = c.Grace
+					}
 				}
 			} else if child.Tag == 1 {
 				// Error
-				bs := child.Data.Bytes()
-				if len(bs) != 1 || bs[0] > 8 {
-					return nil, fmt.Errorf("failed to decode data bytes: %s", "invalid PasswordPolicyResponse enum value")
+				packet, err := ber.DecodePacketErr(child.Data.Bytes())
+				if err != nil {
+					return nil, fmt.Errorf("failed to decode data bytes: %s", err)
 				}
-				val := int8(bs[0])
+				val, ok := packet.Value.(int8)
+				if !ok {
+					// what to do?
+					val = -1
+				}
 				c.Error = val
 				child.Value = c.Error
 				c.ErrorString = BeheraPasswordPolicyErrorMap[c.Error]
@@ -486,10 +456,6 @@ func DecodeControl(packet *ber.Packet) (Control, error) {
 		return NewControlMicrosoftNotification(), nil
 	case ControlTypeMicrosoftShowDeleted:
 		return NewControlMicrosoftShowDeleted(), nil
-	case ControlTypeMicrosoftServerLinkTTL:
-		return NewControlMicrosoftServerLinkTTL(), nil
-	case ControlTypeSubtreeDelete:
-		return NewControlSubtreeDelete(), nil
 	default:
 		c := new(ControlString)
 		c.ControlType = ControlType
@@ -522,30 +488,6 @@ func NewControlBeheraPasswordPolicy() *ControlBeheraPasswordPolicy {
 		Grace:  -1,
 		Error:  -1,
 	}
-}
-
-type ControlSubtreeDelete struct{}
-
-func (c *ControlSubtreeDelete) GetControlType() string {
-	return ControlTypeSubtreeDelete
-}
-
-func NewControlSubtreeDelete() *ControlSubtreeDelete {
-	return &ControlSubtreeDelete{}
-}
-
-func (c *ControlSubtreeDelete) Encode() *ber.Packet {
-	packet := ber.Encode(ber.ClassUniversal, ber.TypeConstructed, ber.TagSequence, nil, "Control")
-	packet.AppendChild(ber.NewString(ber.ClassUniversal, ber.TypePrimitive, ber.TagOctetString, ControlTypeSubtreeDelete, "Control Type ("+ControlTypeMap[ControlTypeSubtreeDelete]+")"))
-
-	return packet
-}
-
-func (c *ControlSubtreeDelete) String() string {
-	return fmt.Sprintf(
-		"Control Type: %s (%q)",
-		ControlTypeMap[ControlTypeSubtreeDelete],
-		ControlTypeSubtreeDelete)
 }
 
 func encodeControls(controls []Control) *ber.Packet {
