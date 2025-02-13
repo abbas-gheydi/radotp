@@ -12,6 +12,7 @@ type RadConfs struct {
 	Secret                     string
 	Enable_Fortinet_Group_Name bool
 	Authentication_Mode        string //only_otp, only_password, two_fa
+	EnableMessageAuthenticator bool
 }
 
 const (

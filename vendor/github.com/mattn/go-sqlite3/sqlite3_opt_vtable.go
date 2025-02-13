@@ -3,7 +3,6 @@
 // Use of this source code is governed by an MIT-style
 // license that can be found in the LICENSE file.
 
-//go:build sqlite_vtable || vtable
 // +build sqlite_vtable vtable
 
 package sqlite3
@@ -517,7 +516,7 @@ func goMDestroy(pClientData unsafe.Pointer) {
 func goVFilter(pCursor unsafe.Pointer, idxNum C.int, idxName *C.char, argc C.int, argv **C.sqlite3_value) *C.char {
 	vtc := lookupHandle(pCursor).(*sqliteVTabCursor)
 	args := (*[(math.MaxInt32 - 1) / unsafe.Sizeof((*C.sqlite3_value)(nil))]*C.sqlite3_value)(unsafe.Pointer(argv))[:argc:argc]
-	vals := make([]any, 0, argc)
+	vals := make([]interface{}, 0, argc)
 	for _, v := range args {
 		conv, err := callbackArgGeneric(v)
 		if err != nil {
@@ -589,7 +588,7 @@ func goVUpdate(pVTab unsafe.Pointer, argc C.int, argv **C.sqlite3_value, pRowid 
 	if v, ok := vt.vTab.(VTabUpdater); ok {
 		// convert argv
 		args := (*[(math.MaxInt32 - 1) / unsafe.Sizeof((*C.sqlite3_value)(nil))]*C.sqlite3_value)(unsafe.Pointer(argv))[:argc:argc]
-		vals := make([]any, 0, argc)
+		vals := make([]interface{}, 0, argc)
 		for _, v := range args {
 			conv, err := callbackArgGeneric(v)
 			if err != nil {
@@ -663,9 +662,9 @@ type VTab interface {
 // deleted.
 // See: https://sqlite.org/vtab.html#xupdate
 type VTabUpdater interface {
-	Delete(any) error
-	Insert(any, []any) (int64, error)
-	Update(any, []any) error
+	Delete(interface{}) error
+	Insert(interface{}, []interface{}) (int64, error)
+	Update(interface{}, []interface{}) error
 }
 
 // VTabCursor describes cursors that point into the virtual table and are used
@@ -674,7 +673,7 @@ type VTabCursor interface {
 	// http://sqlite.org/vtab.html#xclose
 	Close() error
 	// http://sqlite.org/vtab.html#xfilter
-	Filter(idxNum int, idxStr string, vals []any) error
+	Filter(idxNum int, idxStr string, vals []interface{}) error
 	// http://sqlite.org/vtab.html#xnext
 	Next() error
 	// http://sqlite.org/vtab.html#xeof

@@ -13,7 +13,11 @@ func (db *DB) Migrator() Migrator {
 
 	// apply scopes to migrator
 	for len(tx.Statement.scopes) > 0 {
-		tx = tx.executeScopes()
+		scopes := tx.Statement.scopes
+		tx.Statement.scopes = nil
+		for _, scope := range scopes {
+			tx = scope(tx)
+		}
 	}
 
 	return tx.Dialector.Migrator(tx.Session(&Session{}))
@@ -26,9 +30,9 @@ func (db *DB) AutoMigrate(dst ...interface{}) error {
 
 // ViewOption view option
 type ViewOption struct {
-	Replace     bool   // If true, exec `CREATE`. If false, exec `CREATE OR REPLACE`
-	CheckOption string // optional. e.g. `WITH [ CASCADED | LOCAL ] CHECK OPTION`
-	Query       *DB    // required subquery.
+	Replace     bool
+	CheckOption string
+	Query       *DB
 }
 
 // ColumnType column type interface
@@ -56,14 +60,6 @@ type Index interface {
 	Option() string
 }
 
-// TableType table type interface
-type TableType interface {
-	Schema() string
-	Name() string
-	Type() string
-	Comment() (comment string, ok bool)
-}
-
 // Migrator migrator interface
 type Migrator interface {
 	// AutoMigrate
@@ -80,15 +76,12 @@ type Migrator interface {
 	HasTable(dst interface{}) bool
 	RenameTable(oldName, newName interface{}) error
 	GetTables() (tableList []string, err error)
-	TableType(dst interface{}) (TableType, error)
 
 	// Columns
 	AddColumn(dst interface{}, field string) error
 	DropColumn(dst interface{}, field string) error
 	AlterColumn(dst interface{}, field string) error
 	MigrateColumn(dst interface{}, field *schema.Field, columnType ColumnType) error
-	// MigrateColumnUnique migrate column's UNIQUE constraint, it's part of MigrateColumn.
-	MigrateColumnUnique(dst interface{}, field *schema.Field, columnType ColumnType) error
 	HasColumn(dst interface{}, field string) bool
 	RenameColumn(dst interface{}, oldName, field string) error
 	ColumnTypes(dst interface{}) ([]ColumnType, error)

@@ -55,7 +55,6 @@ type Config struct {
 	SlowThreshold             time.Duration
 	Colorful                  bool
 	IgnoreRecordNotFoundError bool
-	ParameterizedQueries      bool
 	LogLevel                  LogLevel
 }
 
@@ -69,7 +68,7 @@ type Interface interface {
 }
 
 var (
-	// Discard logger will print any log to io.Discard
+	// Discard Discard logger will print any log to io.Discard
 	Discard = New(log.New(io.Discard, "", log.LstdFlags), Config{})
 	// Default Default logger
 	Default = New(log.New(os.Stdout, "\r\n", log.LstdFlags), Config{
@@ -78,7 +77,7 @@ var (
 		IgnoreRecordNotFoundError: false,
 		Colorful:                  true,
 	})
-	// Recorder logger records running SQL into a recorder instance
+	// Recorder Recorder logger records running SQL into a recorder instance
 	Recorder = traceRecorder{Interface: Default, BeginAt: time.Now()}
 )
 
@@ -129,30 +128,28 @@ func (l *logger) LogMode(level LogLevel) Interface {
 }
 
 // Info print info
-func (l *logger) Info(ctx context.Context, msg string, data ...interface{}) {
+func (l logger) Info(ctx context.Context, msg string, data ...interface{}) {
 	if l.LogLevel >= Info {
 		l.Printf(l.infoStr+msg, append([]interface{}{utils.FileWithLineNum()}, data...)...)
 	}
 }
 
 // Warn print warn messages
-func (l *logger) Warn(ctx context.Context, msg string, data ...interface{}) {
+func (l logger) Warn(ctx context.Context, msg string, data ...interface{}) {
 	if l.LogLevel >= Warn {
 		l.Printf(l.warnStr+msg, append([]interface{}{utils.FileWithLineNum()}, data...)...)
 	}
 }
 
 // Error print error messages
-func (l *logger) Error(ctx context.Context, msg string, data ...interface{}) {
+func (l logger) Error(ctx context.Context, msg string, data ...interface{}) {
 	if l.LogLevel >= Error {
 		l.Printf(l.errStr+msg, append([]interface{}{utils.FileWithLineNum()}, data...)...)
 	}
 }
 
 // Trace print sql message
-//
-//nolint:cyclop
-func (l *logger) Trace(ctx context.Context, begin time.Time, fc func() (string, int64), err error) {
+func (l logger) Trace(ctx context.Context, begin time.Time, fc func() (string, int64), err error) {
 	if l.LogLevel <= Silent {
 		return
 	}
@@ -184,14 +181,6 @@ func (l *logger) Trace(ctx context.Context, begin time.Time, fc func() (string, 
 	}
 }
 
-// ParamsFilter filter params
-func (l *logger) ParamsFilter(ctx context.Context, sql string, params ...interface{}) (string, []interface{}) {
-	if l.Config.ParameterizedQueries {
-		return sql, nil
-	}
-	return sql, params
-}
-
 type traceRecorder struct {
 	Interface
 	BeginAt      time.Time
@@ -200,8 +189,8 @@ type traceRecorder struct {
 	Err          error
 }
 
-// New trace recorder
-func (l *traceRecorder) New() *traceRecorder {
+// New new trace recorder
+func (l traceRecorder) New() *traceRecorder {
 	return &traceRecorder{Interface: l.Interface, BeginAt: time.Now()}
 }
 

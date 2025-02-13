@@ -94,33 +94,35 @@ func AddVendorGroup(p *radius.Packet, r *radius.Request) {
 // AddMessageAuthenticator adds the Message-Authenticator attribute to a RADIUS packet.
 // Message-Authenticator = HMAC-MD5 (Type, Identifier, Length, Request Authenticator, Attributes)
 func AddMessageAuthenticator(packet *radius.Packet) error {
-	// Step 1: Set the Message-Authenticator field to zero.
-	placeholder := make([]byte, 16) // 16 bytes of zeros
-	err := rfc2869.MessageAuthenticator_Set(packet, placeholder)
-	if err != nil {
-		return err
+	if RadiusConfigs.EnableMessageAuthenticator {
+		// Step 1: Set the Message-Authenticator field to zero.
+		placeholder := make([]byte, 16) // 16 bytes of zeros
+		err := rfc2869.MessageAuthenticator_Set(packet, placeholder)
+		if err != nil {
+			return err
+		}
+
+		// Step 2: Marshal the packet to get the binary representation
+		b, err := packet.MarshalBinary()
+		if err != nil {
+			return err
+		}
+
+		// Step 3: Calculate HMAC-MD5 with the shared secret
+		mac := hmac.New(md5.New, []byte(RadiusConfigs.Secret))
+		mac.Write(b)
+
+		// Step 4: Get the authenticator (HMAC result)
+		authenticator := mac.Sum(nil)
+
+		// Step 5: Set the Message-Authenticator field
+		err = rfc2869.MessageAuthenticator_Set(packet, authenticator)
+		if err != nil {
+			return err
+		}
 	}
-
-	// Step 2: Marshal the packet to get the binary representation
-	b, err := packet.MarshalBinary()
-	if err != nil {
-		return err
-	}
-
-	// Step 3: Calculate HMAC-MD5 with the shared secret
-	mac := hmac.New(md5.New, []byte(RadiusConfigs.Secret))
-	mac.Write(b)
-
-	// Step 4: Get the authenticator (HMAC result)
-	authenticator := mac.Sum(nil)
-
-	// Step 5: Set the Message-Authenticator field
-	err = rfc2869.MessageAuthenticator_Set(packet, authenticator)
-	if err != nil {
-		return err
-	}
-
 	return nil
+
 }
 
 func sendToMonitoring(username string, stage string, stat string) {

@@ -8,8 +8,6 @@ import (
 	"unicode/utf8"
 
 	"github.com/jinzhu/inflection"
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
 )
 
 // Namer namer interface
@@ -21,7 +19,6 @@ type Namer interface {
 	RelationshipFKName(Relationship) string
 	CheckerName(table, column string) string
 	IndexName(table, column string) string
-	UniqueName(table, column string) string
 }
 
 // Replacer replacer interface like strings.Replacer
@@ -29,15 +26,12 @@ type Replacer interface {
 	Replace(name string) string
 }
 
-var _ Namer = (*NamingStrategy)(nil)
-
 // NamingStrategy tables, columns naming strategy
 type NamingStrategy struct {
-	TablePrefix         string
-	SingularTable       bool
-	NameReplacer        Replacer
-	NoLowerCase         bool
-	IdentifierMaxLength int
+	TablePrefix   string
+	SingularTable bool
+	NameReplacer  Replacer
+	NoLowerCase   bool
 }
 
 // TableName convert string to table name
@@ -90,26 +84,17 @@ func (ns NamingStrategy) IndexName(table, column string) string {
 	return ns.formatName("idx", table, ns.toDBName(column))
 }
 
-// UniqueName generate unique constraint name
-func (ns NamingStrategy) UniqueName(table, column string) string {
-	return ns.formatName("uni", table, ns.toDBName(column))
-}
-
 func (ns NamingStrategy) formatName(prefix, table, name string) string {
 	formattedName := strings.ReplaceAll(strings.Join([]string{
 		prefix, table, name,
 	}, "_"), ".", "_")
 
-	if ns.IdentifierMaxLength == 0 {
-		ns.IdentifierMaxLength = 64
-	}
-
-	if utf8.RuneCountInString(formattedName) > ns.IdentifierMaxLength {
+	if utf8.RuneCountInString(formattedName) > 64 {
 		h := sha1.New()
 		h.Write([]byte(formattedName))
 		bs := h.Sum(nil)
 
-		formattedName = formattedName[0:ns.IdentifierMaxLength-8] + hex.EncodeToString(bs)[:8]
+		formattedName = formattedName[0:56] + hex.EncodeToString(bs)[:8]
 	}
 	return formattedName
 }
@@ -123,7 +108,7 @@ var (
 func init() {
 	commonInitialismsForReplacer := make([]string, 0, len(commonInitialisms))
 	for _, initialism := range commonInitialisms {
-		commonInitialismsForReplacer = append(commonInitialismsForReplacer, initialism, cases.Title(language.Und).String(initialism))
+		commonInitialismsForReplacer = append(commonInitialismsForReplacer, initialism, strings.Title(strings.ToLower(initialism)))
 	}
 	commonInitialismsReplacer = strings.NewReplacer(commonInitialismsForReplacer...)
 }
@@ -188,9 +173,9 @@ func (ns NamingStrategy) toDBName(name string) string {
 }
 
 func (ns NamingStrategy) toSchemaName(name string) string {
-	result := strings.ReplaceAll(cases.Title(language.Und, cases.NoLower).String(strings.ReplaceAll(name, "_", " ")), " ", "")
+	result := strings.ReplaceAll(strings.Title(strings.ReplaceAll(name, "_", " ")), " ", "")
 	for _, initialism := range commonInitialisms {
-		result = regexp.MustCompile(cases.Title(language.Und, cases.NoLower).String(strings.ToLower(initialism))+"([A-Z]|$|_)").ReplaceAllString(result, initialism+"$1")
+		result = regexp.MustCompile(strings.Title(strings.ToLower(initialism))+"([A-Z]|$|_)").ReplaceAllString(result, initialism+"$1")
 	}
 	return result
 }

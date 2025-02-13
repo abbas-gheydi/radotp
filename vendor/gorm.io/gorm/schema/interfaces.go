@@ -4,12 +4,6 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-// ConstraintInterface database constraint interface
-type ConstraintInterface interface {
-	GetName() string
-	Build() (sql string, vars []interface{})
-}
-
 // GormDataTypeInterface gorm data type interface
 type GormDataTypeInterface interface {
 	GormDataType() string

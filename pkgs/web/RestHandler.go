@@ -13,44 +13,38 @@ var (
 	EnableRestApi bool
 )
 
-// restApiMustAuth wraps a handler with REST API authentication.
 func restApiMustAuth(handler func(w http.ResponseWriter, r *http.Request)) *RestAuthHandler {
+
 	return &RestAuthHandler{next: handler}
 }
 
-// RestAuthHandler is a middleware struct for handling REST API authentication.
 type RestAuthHandler struct {
 	next func(w http.ResponseWriter, r *http.Request)
 }
 
-// ServeHTTP checks if the request is authorized and either proceeds to the next handler
-// or responds with a 403 Forbidden status.
 func (h *RestAuthHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if isRestRequestAuthorized(r) {
-		h.next(w, r) // Call the next handler
+
+	if isRestReqAuthorized(w, r) {
+		h.next(w, r)
+
 	} else {
 		w.WriteHeader(http.StatusForbidden)
+
 		fmt.Fprint(w, "Not Authorized")
+
 	}
+
 }
 
-// secureCompare performs a constant-time comparison of two SHA-512 hashed strings.
-// This helps prevent timing attacks.
-func secureCompare(apiKey string, userKey string) bool {
-	expectedHash := sha512.Sum512([]byte(apiKey))
-	providedHash := sha512.Sum512([]byte(userKey))
-	return subtle.ConstantTimeCompare(expectedHash[:], providedHash[:]) == 1
+func secureCompare(apikey string, userkey string) bool {
+	givenSha := sha512.Sum512([]byte(apikey))
+	actualSha := sha512.Sum512([]byte(userkey))
+
+	return subtle.ConstantTimeCompare(givenSha[:], actualSha[:]) == 1
 }
 
-// isRestRequestAuthorized checks if the incoming request is authorized
-// by comparing the "Authorization" header with the expected API key.
-func isRestRequestAuthorized(r *http.Request) bool {
-	// Construct the expected Bearer token
-	expectedBearerToken := bearerPrefix + ApiKey
-
-	// Extract the "Authorization" header from the request
+func isRestReqAuthorized(w http.ResponseWriter, r *http.Request) bool {
+	var bearerkey = bearerPrefix + ApiKey
 	userToken := r.Header.Get("Authorization")
-
-	// Verify the token and ensure REST API is enabled
-	return secureCompare(expectedBearerToken, userToken) && ApiKey != "" && EnableRestApi
+	return secureCompare(bearerkey, userToken) && ApiKey != "" && EnableRestApi
 }

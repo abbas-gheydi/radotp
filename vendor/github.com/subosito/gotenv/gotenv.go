@@ -3,7 +3,6 @@ package gotenv
 
 import (
 	"bufio"
-	"bytes"
 	"fmt"
 	"io"
 	"os"
@@ -12,9 +11,6 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-
-	"golang.org/x/text/encoding/unicode"
-	"golang.org/x/text/transform"
 )
 
 const (
@@ -23,13 +19,9 @@ const (
 
 	// Pattern for detecting valid variable within a value
 	variablePattern = `(\\)?(\$)(\{?([A-Z0-9_]+)?\}?)`
-)
 
-// Byte order mark character
-var (
-	bomUTF8    = []byte("\xEF\xBB\xBF")
-	bomUTF16LE = []byte("\xFF\xFE")
-	bomUTF16BE = []byte("\xFE\xFF")
+	// Byte order mark character
+	bom = "\xef\xbb\xbf"
 )
 
 // Env holds key/value pair of valid environment variable
@@ -182,68 +174,20 @@ func Write(env Env, filename string) error {
 	return file.Sync()
 }
 
-// splitLines is a valid SplitFunc for a bufio.Scanner. It will split lines on CR ('\r'), LF ('\n') or CRLF (any of the three sequences).
-// If a CR is immediately followed by a LF, it is treated as a CRLF (one single line break).
-func splitLines(data []byte, atEOF bool) (advance int, token []byte, err error) {
-	if atEOF && len(data) == 0 {
-		return 0, nil, bufio.ErrFinalToken
-	}
-
-	idx := bytes.IndexAny(data, "\r\n")
-	switch {
-	case atEOF && idx < 0:
-		return len(data), data, bufio.ErrFinalToken
-
-	case idx < 0:
-		return 0, nil, nil
-	}
-
-	// consume CR or LF
-	eol := idx + 1
-	// detect CRLF
-	if len(data) > eol && data[eol-1] == '\r' && data[eol] == '\n' {
-		eol++
-	}
-
-	return eol, data[:idx], nil
-}
-
 func strictParse(r io.Reader, override bool) (Env, error) {
 	env := make(Env)
+	scanner := bufio.NewScanner(r)
 
-	buf := new(bytes.Buffer)
-	tee := io.TeeReader(r, buf)
-
-	// There can be a maximum of 3 BOM bytes.
-	bomByteBuffer := make([]byte, 3)
-	_, err := tee.Read(bomByteBuffer)
-	if err != nil && err != io.EOF {
-		return env, err
-	}
-
-	z := io.MultiReader(buf, r)
-
-	// We chooes a different scanner depending on file encoding.
-	var scanner *bufio.Scanner
-
-	if bytes.HasPrefix(bomByteBuffer, bomUTF8) {
-		scanner = bufio.NewScanner(transform.NewReader(z, unicode.UTF8BOM.NewDecoder()))
-	} else if bytes.HasPrefix(bomByteBuffer, bomUTF16LE) {
-		scanner = bufio.NewScanner(transform.NewReader(z, unicode.UTF16(unicode.LittleEndian, unicode.ExpectBOM).NewDecoder()))
-	} else if bytes.HasPrefix(bomByteBuffer, bomUTF16BE) {
-		scanner = bufio.NewScanner(transform.NewReader(z, unicode.UTF16(unicode.BigEndian, unicode.ExpectBOM).NewDecoder()))
-	} else {
-		scanner = bufio.NewScanner(z)
-	}
-
-	scanner.Split(splitLines)
+	firstLine := true
 
 	for scanner.Scan() {
-		if err := scanner.Err(); err != nil {
-			return env, err
+		line := strings.TrimSpace(scanner.Text())
+
+		if firstLine {
+			line = strings.TrimPrefix(line, bom)
+			firstLine = false
 		}
 
-		line := strings.TrimSpace(scanner.Text())
 		if line == "" || line[0] == '#' {
 			continue
 		}
@@ -291,7 +235,7 @@ func strictParse(r io.Reader, override bool) (Env, error) {
 		}
 	}
 
-	return env, scanner.Err()
+	return env, nil
 }
 
 var (
@@ -339,6 +283,7 @@ func parseLine(s string, env Env, override bool) error {
 			return varReplacement(s, hsq, env, override)
 		}
 		val = varRgx.ReplaceAllStringFunc(val, fv)
+		val = parseVal(val, env, hdq, override)
 	}
 
 	env[key] = val
@@ -406,4 +351,19 @@ func checkFormat(s string, env Env) error {
 	}
 
 	return fmt.Errorf("line `%s` doesn't match format", s)
+}
+
+func parseVal(val string, env Env, ignoreNewlines bool, override bool) string {
+	if strings.Contains(val, "=") && !ignoreNewlines {
+		kv := strings.Split(val, "\r")
+
+		if len(kv) > 1 {
+			val = kv[0]
+			for _, l := range kv[1:] {
+				_ = parseLine(l, env, override)
+			}
+		}
+	}
+
+	return val
 }

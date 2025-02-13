@@ -126,7 +126,7 @@ func (expr NamedExpr) Build(builder Builder) {
 	for _, v := range []byte(expr.SQL) {
 		if v == '@' && !inName {
 			inName = true
-			name = name[:0]
+			name = []byte{}
 		} else if v == ' ' || v == ',' || v == ')' || v == '"' || v == '\'' || v == '`' || v == '\r' || v == '\n' || v == ';' {
 			if inName {
 				if nv, ok := namedMap[string(name)]; ok {
@@ -246,19 +246,15 @@ func (eq Eq) Build(builder Builder) {
 
 	switch eq.Value.(type) {
 	case []string, []int, []int32, []int64, []uint, []uint32, []uint64, []interface{}:
+		builder.WriteString(" IN (")
 		rv := reflect.ValueOf(eq.Value)
-		if rv.Len() == 0 {
-			builder.WriteString(" IN (NULL)")
-		} else {
-			builder.WriteString(" IN (")
-			for i := 0; i < rv.Len(); i++ {
-				if i > 0 {
-					builder.WriteByte(',')
-				}
-				builder.AddVar(builder, rv.Index(i).Interface())
+		for i := 0; i < rv.Len(); i++ {
+			if i > 0 {
+				builder.WriteByte(',')
 			}
-			builder.WriteByte(')')
+			builder.AddVar(builder, rv.Index(i).Interface())
 		}
+		builder.WriteByte(')')
 	default:
 		if eqNil(eq.Value) {
 			builder.WriteString(" IS NULL")

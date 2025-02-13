@@ -70,7 +70,8 @@ type SerializerValuerInterface interface {
 }
 
 // JSONSerializer json serializer
-type JSONSerializer struct{}
+type JSONSerializer struct {
+}
 
 // Scan implements serializer interface
 func (JSONSerializer) Scan(ctx context.Context, field *Field, dst reflect.Value, dbValue interface{}) (err error) {
@@ -84,10 +85,7 @@ func (JSONSerializer) Scan(ctx context.Context, field *Field, dst reflect.Value,
 		case string:
 			bytes = []byte(v)
 		default:
-			bytes, err = json.Marshal(v)
-			if err != nil {
-				return err
-			}
+			return fmt.Errorf("failed to unmarshal JSONB value: %#v", dbValue)
 		}
 
 		if len(bytes) > 0 {
@@ -102,17 +100,12 @@ func (JSONSerializer) Scan(ctx context.Context, field *Field, dst reflect.Value,
 // Value implements serializer interface
 func (JSONSerializer) Value(ctx context.Context, field *Field, dst reflect.Value, fieldValue interface{}) (interface{}, error) {
 	result, err := json.Marshal(fieldValue)
-	if string(result) == "null" {
-		if field.TagSettings["NOT NULL"] != "" {
-			return "", nil
-		}
-		return nil, err
-	}
 	return string(result), err
 }
 
 // UnixSecondSerializer json serializer
-type UnixSecondSerializer struct{}
+type UnixSecondSerializer struct {
+}
 
 // Scan implements serializer interface
 func (UnixSecondSerializer) Scan(ctx context.Context, field *Field, dst reflect.Value, dbValue interface{}) (err error) {
@@ -129,12 +122,12 @@ func (UnixSecondSerializer) Value(ctx context.Context, field *Field, dst reflect
 	rv := reflect.ValueOf(fieldValue)
 	switch v := fieldValue.(type) {
 	case int64, int, uint, uint64, int32, uint32, int16, uint16:
-		result = time.Unix(reflect.Indirect(rv).Int(), 0).UTC()
+		result = time.Unix(reflect.Indirect(rv).Int(), 0)
 	case *int64, *int, *uint, *uint64, *int32, *uint32, *int16, *uint16:
 		if rv.IsZero() {
 			return nil, nil
 		}
-		result = time.Unix(reflect.Indirect(rv).Int(), 0).UTC()
+		result = time.Unix(reflect.Indirect(rv).Int(), 0)
 	default:
 		err = fmt.Errorf("invalid field type %#v for UnixSecondSerializer, only int, uint supported", v)
 	}
@@ -142,7 +135,8 @@ func (UnixSecondSerializer) Value(ctx context.Context, field *Field, dst reflect
 }
 
 // GobSerializer gob serializer
-type GobSerializer struct{}
+type GobSerializer struct {
+}
 
 // Scan implements serializer interface
 func (GobSerializer) Scan(ctx context.Context, field *Field, dst reflect.Value, dbValue interface{}) (err error) {

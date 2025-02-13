@@ -15,8 +15,8 @@ const keyDelimiter = "_"
 // (commonly called as dotenv format).
 type Codec struct{}
 
-func (Codec) Encode(v map[string]any) ([]byte, error) {
-	flattened := map[string]any{}
+func (Codec) Encode(v map[string]interface{}) ([]byte, error) {
+	flattened := map[string]interface{}{}
 
 	flattened = flattenAndMergeMap(flattened, v, "", keyDelimiter)
 
@@ -40,7 +40,7 @@ func (Codec) Encode(v map[string]any) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func (Codec) Decode(b []byte, v map[string]any) error {
+func (Codec) Decode(b []byte, v map[string]interface{}) error {
 	var buf bytes.Buffer
 
 	_, err := buf.Write(b)

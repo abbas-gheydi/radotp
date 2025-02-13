@@ -12,16 +12,16 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/pelletier/go-toml/v2/internal/ast"
 	"github.com/pelletier/go-toml/v2/internal/danger"
 	"github.com/pelletier/go-toml/v2/internal/tracker"
-	"github.com/pelletier/go-toml/v2/unstable"
 )
 
 // Unmarshal deserializes a TOML document into a Go value.
 //
 // It is a shortcut for Decoder.Decode() with the default options.
 func Unmarshal(data []byte, v interface{}) error {
-	p := unstable.Parser{}
+	p := parser{}
 	p.Reset(data)
 	d := decoder{p: &p}
 
@@ -35,9 +35,6 @@ type Decoder struct {
 
 	// global settings
 	strict bool
-
-	// toggles unmarshaler interface
-	unmarshalerInterface bool
 }
 
 // NewDecoder creates a new Decoder that will read from r.
@@ -57,31 +54,13 @@ func (d *Decoder) DisallowUnknownFields() *Decoder {
 	return d
 }
 
-// EnableUnmarshalerInterface allows to enable unmarshaler interface.
-//
-// With this feature enabled, types implementing the unstable/Unmarshaler
-// interface can be decoded from any structure of the document. It allows types
-// that don't have a straightfoward TOML representation to provide their own
-// decoding logic.
-//
-// Currently, types can only decode from a single value. Tables and array tables
-// are not supported.
-//
-// *Unstable:* This method does not follow the compatibility guarantees of
-// semver. It can be changed or removed without a new major version being
-// issued.
-func (d *Decoder) EnableUnmarshalerInterface() *Decoder {
-	d.unmarshalerInterface = true
-	return d
-}
-
 // Decode the whole content of r into v.
 //
 // By default, values in the document that don't exist in the target Go value
 // are ignored. See Decoder.DisallowUnknownFields() to change this behavior.
 //
 // When a TOML local date, time, or date-time is decoded into a time.Time, its
-// value is represented in time.Local timezone. Otherwise the appropriate Local*
+// value is represented in time.Local timezone. Otherwise the approriate Local*
 // structure is used. For time values, precision up to the nanosecond is
 // supported by truncating extra digits.
 //
@@ -122,14 +101,13 @@ func (d *Decoder) Decode(v interface{}) error {
 		return fmt.Errorf("toml: %w", err)
 	}
 
-	p := unstable.Parser{}
+	p := parser{}
 	p.Reset(b)
 	dec := decoder{
 		p: &p,
 		strict: strict{
 			Enabled: d.strict,
 		},
-		unmarshalerInterface: d.unmarshalerInterface,
 	}
 
 	return dec.FromParser(v)
@@ -137,7 +115,7 @@ func (d *Decoder) Decode(v interface{}) error {
 
 type decoder struct {
 	// Which parser instance in use for this decoding session.
-	p *unstable.Parser
+	p *parser
 
 	// Flag indicating that the current expression is stashed.
 	// If set to true, calling nextExpr will not actually pull a new expression
@@ -148,10 +126,6 @@ type decoder struct {
 	// table could not be created (missing field in map), so all KV expressions
 	// need to be skipped.
 	skipUntilTable bool
-
-	// Flag indicating that the current array/slice table should be cleared because
-	// it is the first encounter of an array table.
-	clearArrayTable bool
 
 	// Tracks position in Go arrays.
 	// This is used when decoding [[array tables]] into Go arrays. Given array
@@ -165,9 +139,6 @@ type decoder struct {
 	// Strict mode
 	strict strict
 
-	// Flag that enables/disables unmarshaler interface.
-	unmarshalerInterface bool
-
 	// Current context for the error.
 	errorContext *errorContext
 }
@@ -178,19 +149,15 @@ type errorContext struct {
 }
 
 func (d *decoder) typeMismatchError(toml string, target reflect.Type) error {
-	return fmt.Errorf("toml: %s", d.typeMismatchString(toml, target))
-}
-
-func (d *decoder) typeMismatchString(toml string, target reflect.Type) string {
 	if d.errorContext != nil && d.errorContext.Struct != nil {
 		ctx := d.errorContext
 		f := ctx.Struct.FieldByIndex(ctx.Field)
-		return fmt.Sprintf("cannot decode TOML %s into struct field %s.%s of type %s", toml, ctx.Struct, f.Name, f.Type)
+		return fmt.Errorf("toml: cannot decode TOML %s into struct field %s.%s of type %s", toml, ctx.Struct, f.Name, f.Type)
 	}
-	return fmt.Sprintf("cannot decode TOML %s into a Go value of type %s", toml, target)
+	return fmt.Errorf("toml: cannot decode TOML %s into a Go value of type %s", toml, target)
 }
 
-func (d *decoder) expr() *unstable.Node {
+func (d *decoder) expr() *ast.Node {
 	return d.p.Expression()
 }
 
@@ -241,12 +208,12 @@ func (d *decoder) FromParser(v interface{}) error {
 
 	err := d.fromParser(r)
 	if err == nil {
-		return d.strict.Error(d.p.Data())
+		return d.strict.Error(d.p.data)
 	}
 
-	var e *unstable.ParserError
+	var e *decodeError
 	if errors.As(err, &e) {
-		return wrapDecodeError(d.p.Data(), e)
+		return wrapDecodeError(d.p.data, e)
 	}
 
 	return err
@@ -267,44 +234,42 @@ func (d *decoder) fromParser(root reflect.Value) error {
 Rules for the unmarshal code:
 
 - The stack is used to keep track of which values need to be set where.
-- handle* functions <=> switch on a given unstable.Kind.
+- handle* functions <=> switch on a given ast.Kind.
 - unmarshalX* functions need to unmarshal a node of kind X.
 - An "object" is either a struct or a map.
 */
 
-func (d *decoder) handleRootExpression(expr *unstable.Node, v reflect.Value) error {
+func (d *decoder) handleRootExpression(expr *ast.Node, v reflect.Value) error {
 	var x reflect.Value
 	var err error
-	var first bool // used for to clear array tables on first use
 
-	if !(d.skipUntilTable && expr.Kind == unstable.KeyValue) {
-		first, err = d.seen.CheckExpression(expr)
+	if !(d.skipUntilTable && expr.Kind == ast.KeyValue) {
+		err = d.seen.CheckExpression(expr)
 		if err != nil {
 			return err
 		}
 	}
 
 	switch expr.Kind {
-	case unstable.KeyValue:
+	case ast.KeyValue:
 		if d.skipUntilTable {
 			return nil
 		}
 		x, err = d.handleKeyValue(expr, v)
-	case unstable.Table:
+	case ast.Table:
 		d.skipUntilTable = false
 		d.strict.EnterTable(expr)
 		x, err = d.handleTable(expr.Key(), v)
-	case unstable.ArrayTable:
+	case ast.ArrayTable:
 		d.skipUntilTable = false
 		d.strict.EnterArrayTable(expr)
-		d.clearArrayTable = first
 		x, err = d.handleArrayTable(expr.Key(), v)
 	default:
 		panic(fmt.Errorf("parser should not permit expression of kind %s at document root", expr.Kind))
 	}
 
 	if d.skipUntilTable {
-		if expr.Kind == unstable.Table || expr.Kind == unstable.ArrayTable {
+		if expr.Kind == ast.Table || expr.Kind == ast.ArrayTable {
 			d.strict.MissingTable(expr)
 		}
 	} else if err == nil && x.IsValid() {
@@ -314,14 +279,14 @@ func (d *decoder) handleRootExpression(expr *unstable.Node, v reflect.Value) err
 	return err
 }
 
-func (d *decoder) handleArrayTable(key unstable.Iterator, v reflect.Value) (reflect.Value, error) {
+func (d *decoder) handleArrayTable(key ast.Iterator, v reflect.Value) (reflect.Value, error) {
 	if key.Next() {
 		return d.handleArrayTablePart(key, v)
 	}
 	return d.handleKeyValues(v)
 }
 
-func (d *decoder) handleArrayTableCollectionLast(key unstable.Iterator, v reflect.Value) (reflect.Value, error) {
+func (d *decoder) handleArrayTableCollectionLast(key ast.Iterator, v reflect.Value) (reflect.Value, error) {
 	switch v.Kind() {
 	case reflect.Interface:
 		elem := v.Elem()
@@ -337,10 +302,6 @@ func (d *decoder) handleArrayTableCollectionLast(key unstable.Iterator, v reflec
 				nelem.Set(reflect.MakeSlice(sliceInterfaceType, elem.Len(), elem.Cap()))
 				reflect.Copy(nelem, elem)
 				elem = nelem
-			}
-			if d.clearArrayTable && elem.Len() > 0 {
-				elem.SetLen(0)
-				d.clearArrayTable = false
 			}
 		}
 		return d.handleArrayTableCollectionLast(key, elem)
@@ -360,10 +321,6 @@ func (d *decoder) handleArrayTableCollectionLast(key unstable.Iterator, v reflec
 
 		return v, nil
 	case reflect.Slice:
-		if d.clearArrayTable && v.Len() > 0 {
-			v.SetLen(0)
-			d.clearArrayTable = false
-		}
 		elemType := v.Type().Elem()
 		var elem reflect.Value
 		if elemType.Kind() == reflect.Interface {
@@ -382,13 +339,13 @@ func (d *decoder) handleArrayTableCollectionLast(key unstable.Iterator, v reflec
 	case reflect.Array:
 		idx := d.arrayIndex(true, v)
 		if idx >= v.Len() {
-			return v, fmt.Errorf("%s at position %d", d.typeMismatchError("array table", v.Type()), idx)
+			return v, fmt.Errorf("toml: cannot decode array table into %s at position %d", v.Type(), idx)
 		}
 		elem := v.Index(idx)
 		_, err := d.handleArrayTable(key, elem)
 		return v, err
 	default:
-		return reflect.Value{}, d.typeMismatchError("array table", v.Type())
+		return reflect.Value{}, fmt.Errorf("toml: cannot decode array table into a %s", v.Type())
 	}
 }
 
@@ -396,7 +353,7 @@ func (d *decoder) handleArrayTableCollectionLast(key unstable.Iterator, v reflec
 // evaluated like a normal key, but if it returns a collection, it also needs to
 // point to the last element of the collection. Unless it is the last part of
 // the key, then it needs to create a new element at the end.
-func (d *decoder) handleArrayTableCollection(key unstable.Iterator, v reflect.Value) (reflect.Value, error) {
+func (d *decoder) handleArrayTableCollection(key ast.Iterator, v reflect.Value) (reflect.Value, error) {
 	if key.IsLast() {
 		return d.handleArrayTableCollectionLast(key, v)
 	}
@@ -433,7 +390,7 @@ func (d *decoder) handleArrayTableCollection(key unstable.Iterator, v reflect.Va
 	case reflect.Array:
 		idx := d.arrayIndex(false, v)
 		if idx >= v.Len() {
-			return v, fmt.Errorf("%s at position %d", d.typeMismatchError("array table", v.Type()), idx)
+			return v, fmt.Errorf("toml: cannot decode array table into %s at position %d", v.Type(), idx)
 		}
 		elem := v.Index(idx)
 		_, err := d.handleArrayTable(key, elem)
@@ -443,7 +400,7 @@ func (d *decoder) handleArrayTableCollection(key unstable.Iterator, v reflect.Va
 	return d.handleArrayTable(key, v)
 }
 
-func (d *decoder) handleKeyPart(key unstable.Iterator, v reflect.Value, nextFn handlerFn, makeFn valueMakerFn) (reflect.Value, error) {
+func (d *decoder) handleKeyPart(key ast.Iterator, v reflect.Value, nextFn handlerFn, makeFn valueMakerFn) (reflect.Value, error) {
 	var rv reflect.Value
 
 	// First, dispatch over v to make sure it is a valid object.
@@ -460,10 +417,7 @@ func (d *decoder) handleKeyPart(key unstable.Iterator, v reflect.Value, nextFn h
 		vt := v.Type()
 
 		// Create the key for the map element. Convert to key type.
-		mk, err := d.keyFromData(vt.Key(), key.Node().Data)
-		if err != nil {
-			return reflect.Value{}, err
-		}
+		mk := reflect.ValueOf(string(key.Node().Data)).Convert(vt.Key())
 
 		// If the map does not exist, create it.
 		if v.IsNil() {
@@ -564,7 +518,7 @@ func (d *decoder) handleKeyPart(key unstable.Iterator, v reflect.Value, nextFn h
 // HandleArrayTablePart navigates the Go structure v using the key v. It is
 // only used for the prefix (non-last) parts of an array-table. When
 // encountering a collection, it should go to the last element.
-func (d *decoder) handleArrayTablePart(key unstable.Iterator, v reflect.Value) (reflect.Value, error) {
+func (d *decoder) handleArrayTablePart(key ast.Iterator, v reflect.Value) (reflect.Value, error) {
 	var makeFn valueMakerFn
 	if key.IsLast() {
 		makeFn = makeSliceInterface
@@ -576,10 +530,10 @@ func (d *decoder) handleArrayTablePart(key unstable.Iterator, v reflect.Value) (
 
 // HandleTable returns a reference when it has checked the next expression but
 // cannot handle it.
-func (d *decoder) handleTable(key unstable.Iterator, v reflect.Value) (reflect.Value, error) {
+func (d *decoder) handleTable(key ast.Iterator, v reflect.Value) (reflect.Value, error) {
 	if v.Kind() == reflect.Slice {
 		if v.Len() == 0 {
-			return reflect.Value{}, unstable.NewParserError(key.Node().Data, "cannot store a table in a slice")
+			return reflect.Value{}, newDecodeError(key.Node().Data, "cannot store a table in a slice")
 		}
 		elem := v.Index(v.Len() - 1)
 		x, err := d.handleTable(key, elem)
@@ -606,7 +560,7 @@ func (d *decoder) handleKeyValues(v reflect.Value) (reflect.Value, error) {
 	var rv reflect.Value
 	for d.nextExpr() {
 		expr := d.expr()
-		if expr.Kind != unstable.KeyValue {
+		if expr.Kind != ast.KeyValue {
 			// Stash the expression so that fromParser can just loop and use
 			// the right handler.
 			// We could just recurse ourselves here, but at least this gives a
@@ -615,7 +569,7 @@ func (d *decoder) handleKeyValues(v reflect.Value) (reflect.Value, error) {
 			break
 		}
 
-		_, err := d.seen.CheckExpression(expr)
+		err := d.seen.CheckExpression(expr)
 		if err != nil {
 			return reflect.Value{}, err
 		}
@@ -633,7 +587,7 @@ func (d *decoder) handleKeyValues(v reflect.Value) (reflect.Value, error) {
 }
 
 type (
-	handlerFn    func(key unstable.Iterator, v reflect.Value) (reflect.Value, error)
+	handlerFn    func(key ast.Iterator, v reflect.Value) (reflect.Value, error)
 	valueMakerFn func() reflect.Value
 )
 
@@ -645,11 +599,11 @@ func makeSliceInterface() reflect.Value {
 	return reflect.MakeSlice(sliceInterfaceType, 0, 16)
 }
 
-func (d *decoder) handleTablePart(key unstable.Iterator, v reflect.Value) (reflect.Value, error) {
+func (d *decoder) handleTablePart(key ast.Iterator, v reflect.Value) (reflect.Value, error) {
 	return d.handleKeyPart(key, v, d.handleTable, makeMapStringInterface)
 }
 
-func (d *decoder) tryTextUnmarshaler(node *unstable.Node, v reflect.Value) (bool, error) {
+func (d *decoder) tryTextUnmarshaler(node *ast.Node, v reflect.Value) (bool, error) {
 	// Special case for time, because we allow to unmarshal to it from
 	// different kind of AST nodes.
 	if v.Type() == timeType {
@@ -659,7 +613,7 @@ func (d *decoder) tryTextUnmarshaler(node *unstable.Node, v reflect.Value) (bool
 	if v.CanAddr() && v.Addr().Type().Implements(textUnmarshalerType) {
 		err := v.Addr().Interface().(encoding.TextUnmarshaler).UnmarshalText(node.Data)
 		if err != nil {
-			return false, unstable.NewParserError(d.p.Raw(node.Raw), "%w", err)
+			return false, newDecodeError(d.p.Raw(node.Raw), "%w", err)
 		}
 
 		return true, nil
@@ -668,17 +622,9 @@ func (d *decoder) tryTextUnmarshaler(node *unstable.Node, v reflect.Value) (bool
 	return false, nil
 }
 
-func (d *decoder) handleValue(value *unstable.Node, v reflect.Value) error {
+func (d *decoder) handleValue(value *ast.Node, v reflect.Value) error {
 	for v.Kind() == reflect.Ptr {
 		v = initAndDereferencePointer(v)
-	}
-
-	if d.unmarshalerInterface {
-		if v.CanAddr() && v.Addr().CanInterface() {
-			if outi, ok := v.Addr().Interface().(unstable.Unmarshaler); ok {
-				return outi.UnmarshalTOML(value)
-			}
-		}
 	}
 
 	ok, err := d.tryTextUnmarshaler(value, v)
@@ -687,32 +633,32 @@ func (d *decoder) handleValue(value *unstable.Node, v reflect.Value) error {
 	}
 
 	switch value.Kind {
-	case unstable.String:
+	case ast.String:
 		return d.unmarshalString(value, v)
-	case unstable.Integer:
+	case ast.Integer:
 		return d.unmarshalInteger(value, v)
-	case unstable.Float:
+	case ast.Float:
 		return d.unmarshalFloat(value, v)
-	case unstable.Bool:
+	case ast.Bool:
 		return d.unmarshalBool(value, v)
-	case unstable.DateTime:
+	case ast.DateTime:
 		return d.unmarshalDateTime(value, v)
-	case unstable.LocalDate:
+	case ast.LocalDate:
 		return d.unmarshalLocalDate(value, v)
-	case unstable.LocalTime:
+	case ast.LocalTime:
 		return d.unmarshalLocalTime(value, v)
-	case unstable.LocalDateTime:
+	case ast.LocalDateTime:
 		return d.unmarshalLocalDateTime(value, v)
-	case unstable.InlineTable:
+	case ast.InlineTable:
 		return d.unmarshalInlineTable(value, v)
-	case unstable.Array:
+	case ast.Array:
 		return d.unmarshalArray(value, v)
 	default:
 		panic(fmt.Errorf("handleValue not implemented for %s", value.Kind))
 	}
 }
 
-func (d *decoder) unmarshalArray(array *unstable.Node, v reflect.Value) error {
+func (d *decoder) unmarshalArray(array *ast.Node, v reflect.Value) error {
 	switch v.Kind() {
 	case reflect.Slice:
 		if v.IsNil() {
@@ -783,7 +729,7 @@ func (d *decoder) unmarshalArray(array *unstable.Node, v reflect.Value) error {
 	return nil
 }
 
-func (d *decoder) unmarshalInlineTable(itable *unstable.Node, v reflect.Value) error {
+func (d *decoder) unmarshalInlineTable(itable *ast.Node, v reflect.Value) error {
 	// Make sure v is an initialized object.
 	switch v.Kind() {
 	case reflect.Map:
@@ -800,7 +746,7 @@ func (d *decoder) unmarshalInlineTable(itable *unstable.Node, v reflect.Value) e
 		}
 		return d.unmarshalInlineTable(itable, elem)
 	default:
-		return unstable.NewParserError(d.p.Raw(itable.Raw), "cannot store inline table in Go type %s", v.Kind())
+		return newDecodeError(itable.Data, "cannot store inline table in Go type %s", v.Kind())
 	}
 
 	it := itable.Children()
@@ -819,7 +765,7 @@ func (d *decoder) unmarshalInlineTable(itable *unstable.Node, v reflect.Value) e
 	return nil
 }
 
-func (d *decoder) unmarshalDateTime(value *unstable.Node, v reflect.Value) error {
+func (d *decoder) unmarshalDateTime(value *ast.Node, v reflect.Value) error {
 	dt, err := parseDateTime(value.Data)
 	if err != nil {
 		return err
@@ -829,7 +775,7 @@ func (d *decoder) unmarshalDateTime(value *unstable.Node, v reflect.Value) error
 	return nil
 }
 
-func (d *decoder) unmarshalLocalDate(value *unstable.Node, v reflect.Value) error {
+func (d *decoder) unmarshalLocalDate(value *ast.Node, v reflect.Value) error {
 	ld, err := parseLocalDate(value.Data)
 	if err != nil {
 		return err
@@ -846,28 +792,28 @@ func (d *decoder) unmarshalLocalDate(value *unstable.Node, v reflect.Value) erro
 	return nil
 }
 
-func (d *decoder) unmarshalLocalTime(value *unstable.Node, v reflect.Value) error {
+func (d *decoder) unmarshalLocalTime(value *ast.Node, v reflect.Value) error {
 	lt, rest, err := parseLocalTime(value.Data)
 	if err != nil {
 		return err
 	}
 
 	if len(rest) > 0 {
-		return unstable.NewParserError(rest, "extra characters at the end of a local time")
+		return newDecodeError(rest, "extra characters at the end of a local time")
 	}
 
 	v.Set(reflect.ValueOf(lt))
 	return nil
 }
 
-func (d *decoder) unmarshalLocalDateTime(value *unstable.Node, v reflect.Value) error {
+func (d *decoder) unmarshalLocalDateTime(value *ast.Node, v reflect.Value) error {
 	ldt, rest, err := parseLocalDateTime(value.Data)
 	if err != nil {
 		return err
 	}
 
 	if len(rest) > 0 {
-		return unstable.NewParserError(rest, "extra characters at the end of a local date time")
+		return newDecodeError(rest, "extra characters at the end of a local date time")
 	}
 
 	if v.Type() == timeType {
@@ -882,7 +828,7 @@ func (d *decoder) unmarshalLocalDateTime(value *unstable.Node, v reflect.Value) 
 	return nil
 }
 
-func (d *decoder) unmarshalBool(value *unstable.Node, v reflect.Value) error {
+func (d *decoder) unmarshalBool(value *ast.Node, v reflect.Value) error {
 	b := value.Data[0] == 't'
 
 	switch v.Kind() {
@@ -891,13 +837,13 @@ func (d *decoder) unmarshalBool(value *unstable.Node, v reflect.Value) error {
 	case reflect.Interface:
 		v.Set(reflect.ValueOf(b))
 	default:
-		return unstable.NewParserError(value.Data, "cannot assign boolean to a %t", b)
+		return newDecodeError(value.Data, "cannot assign boolean to a %t", b)
 	}
 
 	return nil
 }
 
-func (d *decoder) unmarshalFloat(value *unstable.Node, v reflect.Value) error {
+func (d *decoder) unmarshalFloat(value *ast.Node, v reflect.Value) error {
 	f, err := parseFloat(value.Data)
 	if err != nil {
 		return err
@@ -908,13 +854,13 @@ func (d *decoder) unmarshalFloat(value *unstable.Node, v reflect.Value) error {
 		v.SetFloat(f)
 	case reflect.Float32:
 		if f > math.MaxFloat32 {
-			return unstable.NewParserError(value.Data, "number %f does not fit in a float32", f)
+			return newDecodeError(value.Data, "number %f does not fit in a float32", f)
 		}
 		v.SetFloat(f)
 	case reflect.Interface:
 		v.Set(reflect.ValueOf(f))
 	default:
-		return unstable.NewParserError(value.Data, "float cannot be assigned to %s", v.Kind())
+		return newDecodeError(value.Data, "float cannot be assigned to %s", v.Kind())
 	}
 
 	return nil
@@ -940,12 +886,7 @@ func init() {
 	}
 }
 
-func (d *decoder) unmarshalInteger(value *unstable.Node, v reflect.Value) error {
-	kind := v.Kind()
-	if kind == reflect.Float32 || kind == reflect.Float64 {
-		return d.unmarshalFloat(value, v)
-	}
-
+func (d *decoder) unmarshalInteger(value *ast.Node, v reflect.Value) error {
 	i, err := parseInteger(value.Data)
 	if err != nil {
 		return err
@@ -953,7 +894,7 @@ func (d *decoder) unmarshalInteger(value *unstable.Node, v reflect.Value) error 
 
 	var r reflect.Value
 
-	switch kind {
+	switch v.Kind() {
 	case reflect.Int64:
 		v.SetInt(i)
 		return nil
@@ -1014,7 +955,7 @@ func (d *decoder) unmarshalInteger(value *unstable.Node, v reflect.Value) error 
 	case reflect.Interface:
 		r = reflect.ValueOf(i)
 	default:
-		return unstable.NewParserError(d.p.Raw(value.Raw), d.typeMismatchString("integer", v.Type()))
+		return d.typeMismatchError("integer", v.Type())
 	}
 
 	if !r.Type().AssignableTo(v.Type()) {
@@ -1026,20 +967,20 @@ func (d *decoder) unmarshalInteger(value *unstable.Node, v reflect.Value) error 
 	return nil
 }
 
-func (d *decoder) unmarshalString(value *unstable.Node, v reflect.Value) error {
+func (d *decoder) unmarshalString(value *ast.Node, v reflect.Value) error {
 	switch v.Kind() {
 	case reflect.String:
 		v.SetString(string(value.Data))
 	case reflect.Interface:
 		v.Set(reflect.ValueOf(string(value.Data)))
 	default:
-		return unstable.NewParserError(d.p.Raw(value.Raw), d.typeMismatchString("string", v.Type()))
+		return newDecodeError(d.p.Raw(value.Raw), "cannot store TOML string into a Go %s", v.Kind())
 	}
 
 	return nil
 }
 
-func (d *decoder) handleKeyValue(expr *unstable.Node, v reflect.Value) (reflect.Value, error) {
+func (d *decoder) handleKeyValue(expr *ast.Node, v reflect.Value) (reflect.Value, error) {
 	d.strict.EnterKeyValue(expr)
 
 	v, err := d.handleKeyValueInner(expr.Key(), expr.Value(), v)
@@ -1053,7 +994,7 @@ func (d *decoder) handleKeyValue(expr *unstable.Node, v reflect.Value) (reflect.
 	return v, err
 }
 
-func (d *decoder) handleKeyValueInner(key unstable.Iterator, value *unstable.Node, v reflect.Value) (reflect.Value, error) {
+func (d *decoder) handleKeyValueInner(key ast.Iterator, value *ast.Node, v reflect.Value) (reflect.Value, error) {
 	if key.Next() {
 		// Still scoping the key
 		return d.handleKeyValuePart(key, value, v)
@@ -1063,32 +1004,7 @@ func (d *decoder) handleKeyValueInner(key unstable.Iterator, value *unstable.Nod
 	return reflect.Value{}, d.handleValue(value, v)
 }
 
-func (d *decoder) keyFromData(keyType reflect.Type, data []byte) (reflect.Value, error) {
-	switch {
-	case stringType.AssignableTo(keyType):
-		return reflect.ValueOf(string(data)), nil
-
-	case stringType.ConvertibleTo(keyType):
-		return reflect.ValueOf(string(data)).Convert(keyType), nil
-
-	case keyType.Implements(textUnmarshalerType):
-		mk := reflect.New(keyType.Elem())
-		if err := mk.Interface().(encoding.TextUnmarshaler).UnmarshalText(data); err != nil {
-			return reflect.Value{}, fmt.Errorf("toml: error unmarshalling key type %s from text: %w", stringType, err)
-		}
-		return mk, nil
-
-	case reflect.PtrTo(keyType).Implements(textUnmarshalerType):
-		mk := reflect.New(keyType)
-		if err := mk.Interface().(encoding.TextUnmarshaler).UnmarshalText(data); err != nil {
-			return reflect.Value{}, fmt.Errorf("toml: error unmarshalling key type %s from text: %w", stringType, err)
-		}
-		return mk.Elem(), nil
-	}
-	return reflect.Value{}, fmt.Errorf("toml: cannot convert map key of type %s to expected type %s", stringType, keyType)
-}
-
-func (d *decoder) handleKeyValuePart(key unstable.Iterator, value *unstable.Node, v reflect.Value) (reflect.Value, error) {
+func (d *decoder) handleKeyValuePart(key ast.Iterator, value *ast.Node, v reflect.Value) (reflect.Value, error) {
 	// contains the replacement for v
 	var rv reflect.Value
 
@@ -1098,9 +1014,16 @@ func (d *decoder) handleKeyValuePart(key unstable.Iterator, value *unstable.Node
 	case reflect.Map:
 		vt := v.Type()
 
-		mk, err := d.keyFromData(vt.Key(), key.Node().Data)
-		if err != nil {
-			return reflect.Value{}, err
+		mk := reflect.ValueOf(string(key.Node().Data))
+		mkt := stringType
+
+		keyType := vt.Key()
+		if !mkt.AssignableTo(keyType) {
+			if !mkt.ConvertibleTo(keyType) {
+				return reflect.Value{}, fmt.Errorf("toml: cannot convert map key of type %s to expected type %s", mkt, keyType)
+			}
+
+			mk = mk.Convert(keyType)
 		}
 
 		// If the map does not exist, create it.
@@ -1111,9 +1034,15 @@ func (d *decoder) handleKeyValuePart(key unstable.Iterator, value *unstable.Node
 
 		mv := v.MapIndex(mk)
 		set := false
-		if !mv.IsValid() || key.IsLast() {
+		if !mv.IsValid() {
 			set = true
 			mv = reflect.New(v.Type().Elem()).Elem()
+		} else {
+			if key.IsLast() {
+				var x interface{}
+				mv = reflect.ValueOf(&x).Elem()
+				set = true
+			}
 		}
 
 		nv, err := d.handleKeyValueInner(key, value, mv)
@@ -1143,19 +1072,6 @@ func (d *decoder) handleKeyValuePart(key unstable.Iterator, value *unstable.Node
 		d.errorContext.Field = path
 
 		f := fieldByIndex(v, path)
-
-		if !f.CanAddr() {
-			// If the field is not addressable, need to take a slower path and
-			// make a copy of the struct itself to a new location.
-			nvp := reflect.New(v.Type())
-			nvp.Elem().Set(v)
-			v = nvp.Elem()
-			_, err := d.handleKeyValuePart(key, value, v)
-			if err != nil {
-				return reflect.Value{}, err
-			}
-			return nvp.Elem(), nil
-		}
 		x, err := d.handleKeyValueInner(key, value, f)
 		if err != nil {
 			return reflect.Value{}, err
@@ -1221,10 +1137,10 @@ func initAndDereferencePointer(v reflect.Value) reflect.Value {
 
 // Same as reflect.Value.FieldByIndex, but creates pointers if needed.
 func fieldByIndex(v reflect.Value, path []int) reflect.Value {
-	for _, x := range path {
+	for i, x := range path {
 		v = v.Field(x)
 
-		if v.Kind() == reflect.Ptr {
+		if i < len(path)-1 && v.Kind() == reflect.Ptr {
 			if v.IsNil() {
 				v.Set(reflect.New(v.Type().Elem()))
 			}

@@ -72,7 +72,6 @@ func Update(config *Config) func(db *gorm.DB) {
 			db.Statement.AddClauseIfNotExists(clause.Update{})
 			if _, ok := db.Statement.Clauses["SET"]; !ok {
 				if set := ConvertToAssignments(db.Statement); len(set) != 0 {
-					defer delete(db.Statement.Clauses, "SET")
 					db.Statement.AddClause(set)
 				} else {
 					return
@@ -138,9 +137,7 @@ func ConvertToAssignments(stmt *gorm.Statement) (set clause.Set) {
 	case reflect.Slice, reflect.Array:
 		assignValue = func(field *schema.Field, value interface{}) {
 			for i := 0; i < stmt.ReflectValue.Len(); i++ {
-				if stmt.ReflectValue.CanAddr() {
-					field.Set(stmt.Context, stmt.ReflectValue.Index(i), value)
-				}
+				field.Set(stmt.Context, stmt.ReflectValue.Index(i), value)
 			}
 		}
 	case reflect.Struct:
@@ -234,7 +231,7 @@ func ConvertToAssignments(stmt *gorm.Statement) (set clause.Set) {
 						if field.AutoUpdateTime == schema.UnixNanosecond {
 							set = append(set, clause.Assignment{Column: clause.Column{Name: field.DBName}, Value: now.UnixNano()})
 						} else if field.AutoUpdateTime == schema.UnixMillisecond {
-							set = append(set, clause.Assignment{Column: clause.Column{Name: field.DBName}, Value: now.UnixMilli()})
+							set = append(set, clause.Assignment{Column: clause.Column{Name: field.DBName}, Value: now.UnixNano() / 1e6})
 						} else if field.AutoUpdateTime == schema.UnixSecond {
 							set = append(set, clause.Assignment{Column: clause.Column{Name: field.DBName}, Value: now.Unix()})
 						} else {
@@ -246,13 +243,11 @@ func ConvertToAssignments(stmt *gorm.Statement) (set clause.Set) {
 		}
 	default:
 		updatingSchema := stmt.Schema
-		var isDiffSchema bool
 		if !updatingValue.CanAddr() || stmt.Dest != stmt.Model {
 			// different schema
 			updatingStmt := &gorm.Statement{DB: stmt.DB}
 			if err := updatingStmt.Parse(stmt.Dest); err == nil {
 				updatingSchema = updatingStmt.Schema
-				isDiffSchema = true
 			}
 		}
 
@@ -268,7 +263,7 @@ func ConvertToAssignments(stmt *gorm.Statement) (set clause.Set) {
 								if field.AutoUpdateTime == schema.UnixNanosecond {
 									value = stmt.DB.NowFunc().UnixNano()
 								} else if field.AutoUpdateTime == schema.UnixMillisecond {
-									value = stmt.DB.NowFunc().UnixMilli()
+									value = stmt.DB.NowFunc().UnixNano() / 1e6
 								} else if field.AutoUpdateTime == schema.UnixSecond {
 									value = stmt.DB.NowFunc().Unix()
 								} else {
@@ -279,13 +274,7 @@ func ConvertToAssignments(stmt *gorm.Statement) (set clause.Set) {
 
 							if (ok || !isZero) && field.Updatable {
 								set = append(set, clause.Assignment{Column: clause.Column{Name: field.DBName}, Value: value})
-								assignField := field
-								if isDiffSchema {
-									if originField := stmt.Schema.LookUpField(dbName); originField != nil {
-										assignField = originField
-									}
-								}
-								assignValue(assignField, value)
+								assignValue(field, value)
 							}
 						}
 					} else {
